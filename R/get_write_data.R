@@ -35,8 +35,11 @@ write_data <- function(x, file, dir, dir.create = F, clean_memory = F, silent = 
       is.matrix(x) | 
       any(c("ArrowObject", "arrow_dplyr_query") %in% class(x))) {
     
-    if (!stringr::str_detect(tolower(file_dir), "parquet") && 
-        !hasArg(partitioning)) file_dir <- paste0(file_dir, ".parquet")
+    # if (!stringr::str_detect(tolower(file_dir), "parquet") && 
+    #     !hasArg(partitioning)) file_dir <- paste0(file_dir, ".parquet")
+    
+    if (!stringr::str_detect(tolower(file_dir), "parquet")) 
+      file_dir <- paste0(file_dir, ".parquet")
     
     
     
