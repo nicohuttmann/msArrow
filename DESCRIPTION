@@ -1,0 +1,18 @@
+Package: msArrow
+Title: Arrow functions to handle proteomics data 
+Version: 0.0.0.9000
+Authors@R: 
+    person("Nico", "Hüttmann", , "huttmann.nico@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-9321-2675"))
+Description: This package contains Arrow functions to handle proteomics data 
+License: MIT
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Suggests: 
+    arrow, 
+    nanoparquet, 
+    vroom
+VignetteBuilder: knitr
+Imports:
+    tidyverse
+RoxygenNote: 7.3.1
