@@ -223,9 +223,15 @@ add_observations_data <- function(data,
   
   
   # Add column/s
-  data <- dplyr::left_join(data, observations_data, by = "observations") %>% 
-    dplyr::relocate(!!which, .after = c("observations", "variables")) %>% 
-    dplyr::compute()
+  if ("variables" %in% names(data)) {
+    data <- dplyr::left_join(data, observations_data, by = "observations") %>% 
+      dplyr::relocate(!!which, .after = c("observations", "variables")) %>% 
+      dplyr::compute()
+  } else {
+    data <- dplyr::left_join(data, variables_data, by = "variables") %>% 
+      dplyr::relocate(!!which, .after = "observations") %>% 
+      dplyr::compute()
+  }
   
   # Return
   return(data)
@@ -341,42 +347,42 @@ save_observations_data <- function(data,
   
   # Get template
   template <- tryCatch(get_observations_data(dataset = dataset, 
-                                          as_arrow_table = arrow_object), 
+                                             as_arrow_table = arrow_object), 
                        error = function(e) NULL)
   
   if (!is.null(template)) {
-  
-  # If no columns specified, test for overlapping names 
-  if (!hasArg(columns)) {
     
-    if (any("observations" != intersect(names(data),
-                                        get_observations_data_names(dataset)))) {
-      warning("Columns cannot be overwritten if <column> argument is not specified.")
+    # If no columns specified, test for overlapping names 
+    if (!hasArg(columns)) {
       
-      return(invisible(data))
+      if (any("observations" != intersect(names(data),
+                                          get_observations_data_names(dataset)))) {
+        warning("Columns cannot be overwritten if <column> argument is not specified.")
+        
+        return(invisible(data))
+      }
+      
+      columns <- setdiff(names(data), "observations")
+      
+      
+    } else {
+      
+      # Get template
+      template <- template %>% 
+        dplyr::select(-dplyr::any_of(columns))
+      
     }
     
-    columns <- setdiff(names(data), "observations")
+    # Keep only columns to save 
+    data_to_add <- data %>% 
+      dplyr::select(dplyr::all_of(c("observations", 
+                                    columns)))
     
     
-  } else {
+    observations_data_new <- dplyr::left_join(template, data_to_add, 
+                                              by = "observations") %>% 
+      dplyr::compute()
     
-    # Get template
-    template <- template %>% 
-      dplyr::select(-dplyr::any_of(columns))
-    
-  }
-  
-  # Keep only columns to save 
-  data_to_add <- data %>% 
-    dplyr::select(dplyr::all_of(c("observations", 
-                                  columns)))
-  
-  
-  observations_data_new <- dplyr::left_join(template, data_to_add, 
-                                            by = "observations") %>% 
-    dplyr::compute()
-  
   } else {
     
     if (!hasArg(columns)) observations_data_new <- data

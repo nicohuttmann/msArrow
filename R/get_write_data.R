@@ -30,10 +30,11 @@ write_data <- function(x, file, dir, dir.create = F, clean_memory = F, silent = 
    if (dir.create) dir.create(dirname(file_dir), recursive = T, showWarnings = F)
     
     
-  if (tibble::is_tibble(x) | 
+  if ((tibble::is_tibble(x) | 
       is.data.frame(x) | 
       is.matrix(x) | 
-      any(c("ArrowObject", "arrow_dplyr_query") %in% class(x))) {
+      any(c("ArrowObject", "arrow_dplyr_query") %in% class(x))) & 
+      length(tryCatch(arrow::infer_type(x), error = function(e) NULL)) > 0) {
     
     # if (!stringr::str_detect(tolower(file_dir), "parquet") && 
     #     !hasArg(partitioning)) file_dir <- paste0(file_dir, ".parquet")
