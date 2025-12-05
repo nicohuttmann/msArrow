@@ -203,7 +203,7 @@ add_variables_data <- function(data,
     dplyr::compute()
   } else {
     data <- dplyr::left_join(data, variables_data, by = "variables") %>% 
-      dplyr::relocate(!!which, .after = c("observations", "variables")) %>% 
+      dplyr::relocate(!!which, .after = "variables") %>% 
       dplyr::compute()
   }
   

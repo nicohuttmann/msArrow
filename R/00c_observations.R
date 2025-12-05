@@ -228,7 +228,7 @@ add_observations_data <- function(data,
       dplyr::relocate(!!which, .after = c("observations", "variables")) %>% 
       dplyr::compute()
   } else {
-    data <- dplyr::left_join(data, variables_data, by = "variables") %>% 
+    data <- dplyr::left_join(data, variables_data, by = "observations") %>% 
       dplyr::relocate(!!which, .after = "observations") %>% 
       dplyr::compute()
   }
