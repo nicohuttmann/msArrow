@@ -94,15 +94,19 @@ get_dataset_names <- function() {
       warning("Dataset name already exists in .Datasets.")
   }
   
-  if (!hasArg(save_dir)) 
-    save_dir <- tempdir()
+  if (!hasArg(save_dir)) {
+    if (!is.null(.get_defaults("save_dir")))
+      save_dir <- .get_defaults("save_dir")
+    else 
+      save_dir <- tempdir()
+  }
   
   purrr::walk(file.path(save_dir, name, 
                         c("", 
                           "Variables", 
                           "Observations", 
                           "Data_frames")), 
-              \(x) dir.create(x, recursive = T))
+              \(x) if (!dir.exists(x)) dir.create(x, recursive = T))
   
   .Datasets[[name]] <<- list(Variables = c(), 
                              Observations = c(), 

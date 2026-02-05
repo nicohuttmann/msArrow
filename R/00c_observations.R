@@ -56,7 +56,7 @@ get_observations <- function(observations, dataset, ...) {
       dplyr::pull(var = "observations", name = NULL)
     
     if (all(observations %in% observations_all)) {
-      observations_output <- intersect(observations, observations_all)
+      observations_output <- base::intersect(observations, observations_all)
       
       return(observations_output)
       
@@ -95,13 +95,13 @@ get_observations_data_names <- function(dataset) {
   
   observations_.data_names <- names(open_data(.Datasets[[dataset]][["Observations"]]))
   
-  if (any(intersect(observations_data_names, observations_.data_names) != 
+  if (any(base::intersect(observations_data_names, observations_.data_names) != 
           observations_data_names)) {
     message("Observations data names in Datasets and .Datasets do not fully match. 
             Returning intersection.")
   }
   
-  return(intersect(observations_data_names, observations_.data_names))
+  return(base::intersect(observations_data_names, observations_.data_names))
   
 }
 
@@ -228,7 +228,7 @@ add_observations_data <- function(data,
       dplyr::relocate(!!which, .after = c("observations", "variables")) %>% 
       dplyr::compute()
   } else {
-    data <- dplyr::left_join(data, variables_data, by = "observations") %>% 
+    data <- dplyr::left_join(data, observations_data, by = "observations") %>% 
       dplyr::relocate(!!which, .after = "observations") %>% 
       dplyr::compute()
   }
@@ -266,8 +266,12 @@ add_observations_data <- function(data,
   # Check dataset 
   dataset <- get_dataset(dataset)
   
-  if (!hasArg(save_dir)) 
-    save_dir <- tempdir()
+  if (!hasArg(save_dir)) {
+    if (!is.null(.get_defaults("save_dir")))
+      save_dir <- .get_defaults("save_dir")
+    else 
+      save_dir <- tempdir()
+  }
   
   else if (!dir.exists(file.path(save_dir, dataset)))
     stop ('Dataset directory does not exist. Use .add_dataset("', dataset, '")')
@@ -279,7 +283,6 @@ add_observations_data <- function(data,
                              stringr::str_remove(paste0(name, tag), 
                                                  "_$")), 
                dir = save_dir, 
-               dir.create = ifelse(save_dir == tempdir(), T, F), 
                silent = silent)
   
   if (!hasArg(observations_data_frame_preview))
@@ -355,7 +358,7 @@ save_observations_data <- function(data,
     # If no columns specified, test for overlapping names 
     if (!hasArg(columns)) {
       
-      if (any("observations" != intersect(names(data),
+      if (any("observations" != base::intersect(names(data),
                                           get_observations_data_names(dataset)))) {
         warning("Columns cannot be overwritten if <column> argument is not specified.")
         

@@ -2,19 +2,24 @@
 % Please edit documentation in R/get_write_data.R
 \name{get_data}
 \alias{get_data}
-\title{Loads data from a file name}
+\title{Loads data from a file name or returns if already in R}
 \usage{
-get_data(file, recursive = T, credit = 10, as_arrow_table = F, ...)
+get_data(file, fallback, recursive = T, credit = 10, as_arrow_table = F, ...)
 }
 \arguments{
 \item{file}{file name}
+
+\item{fallback}{other file name or alternative way to provide the input -
+useful if file is an R object and fallback is a hardcoded string}
 
 \item{recursive}{Should data be recursively loaded?}
 
 \item{credit}{how many recursive steps are allowed}
 
 \item{as_arrow_table}{return a tibble or an Arrow connection}
+
+\item{...}{additional arguments}
 }
 \description{
-Loads data from a file name
+Loads data from a file name or returns if already in R
 }

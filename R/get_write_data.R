@@ -1,21 +1,38 @@
-#' Title
+#' Writes data to a file or temporary file  
 #'
-#' @param x 
-#' @param file 
-#' @param dir 
-#' @param dir.create 
-#' @param clean_memory 
-#' @param silent 
-#' @param partitioning 
+#' `write_data()` decides whether to save the file in the .parquet format if 
+#' possible or as an .Rds file and returns the final file path. If no file 
+#' name is given, a temporary file will be saved. Depending on the file and 
+#' arguments `arrow::write_parquet()`, `arrow::write_dataset()` or R's native 
+#' `saveRDS()` will be used. If redo = F, the function checks if the computation can be skipped. 
 #'
+#' @param x data to be saved 
+#' @param file file name (temporary file if not given; file ending will be 
+#' determined automatically)
+#' @param dir (optional) folder name if easier to specify separate from file 
+#' name 
+#' @param redo Should the computation be skipped, if file of given name already 
+#' exists? File name will still be returned. 
+#' @param clean_memory Should the memory be cleaned with gc()/cleanMem() afer 
+#' writing 
+#' @param silent Should messages be suppressed? 
+#' @param partitioning Should the parquet file be split into  
+#' @param ... additional arguments for the saving function 
 #' @returns
 #' @export
 #'
 #' @examples
-write_data <- function(x, file, dir, dir.create = F, clean_memory = F, silent = T, partitioning) {
+write_data <- function(x, 
+                       file, 
+                       dir, 
+                       redo = T, 
+                       list_as_folders = T, 
+                       clean_memory = F, 
+                       silent = F, 
+                       partitioning = NULL, 
+                       ...) {
   
-  if (!hasArg(x)) stop("No data <x> given.")
-  
+  # 
   if (!hasArg(dir) & !hasArg(file)) {
     file <- tempfile()
     #stop("Please provide the data <x> and a <file>.")
@@ -23,32 +40,56 @@ write_data <- function(x, file, dir, dir.create = F, clean_memory = F, silent = 
     stop("Please provide the data <x> and a <file> name when specifying a directory <dir>.")
   }
   
-  
+  # Get final file path 
   if (hasArg(dir)) file_dir <- file.path(dir, file)
-    else file_dir <- file
+  else file_dir <- file
+  
+  
+  # Check if x should be run or simply save the location
+  if (!redo) {
     
-   if (dir.create) dir.create(dirname(file_dir), recursive = T, showWarnings = F)
+    files_found <- purrr::map_lgl(paste0(file_dir, c(".parquet", ".Rds")) %>% 
+                                    setNames(., .), 
+                                  file.exists)
     
+    if (any(files_found)) {
+      
+      file_return <- names(which(files_found))[1]
+      
+      if (!silent) cat(paste0('Returning location of existing file "', 
+                              file_return, 
+                              '".\n'))
+      
+      return(file_return)
+      
+    }
     
-  if ((tibble::is_tibble(x) | 
-      is.data.frame(x) | 
-      is.matrix(x) | 
-      any(c("ArrowObject", "arrow_dplyr_query") %in% class(x))) & 
-      length(tryCatch(arrow::infer_type(x), error = function(e) NULL)) > 0) {
+  }
+  
+  
+  # Check if any data is given 
+  if (!hasArg(x)) stop("No data <x> given.")
+  
+  # Create directory if does not exist 
+  if (!dir.exists(dirname(file_dir))) 
+    dir.create(dirname(file_dir), recursive = T)
+  
+  # Save as parquet file or dataset 
+  if (((tibble::is_tibble(x) ||
+        is.data.frame(x) ||
+        is.matrix(x)) && 
+       length(tryCatch(arrow::infer_type(x), error = function(e) NULL)) > 0) || 
+      any(stringr::str_detect(class(x), "(A|a)rrow"))) {
     
-    # if (!stringr::str_detect(tolower(file_dir), "parquet") && 
-    #     !hasArg(partitioning)) file_dir <- paste0(file_dir, ".parquet")
-    
-    if (!stringr::str_detect(tolower(file_dir), "parquet")) 
+    if (!stringr::str_detect(tolower(file_dir), "\\.parquet$")) 
       file_dir <- paste0(file_dir, ".parquet")
-    
     
     
     if (!silent) {
       if (!file.exists(file_dir)) {
         cat(paste0('Saving file "', 
-                            file_dir, 
-                            '".'))
+                   file_dir, 
+                   '".'))
       } else {
         cat(paste0('Overwriting file "', 
                    file_dir, 
@@ -56,14 +97,34 @@ write_data <- function(x, file, dir, dir.create = F, clean_memory = F, silent = 
       }
     }
     
-    if (!hasArg(partitioning) || 
-        !partitioning %in% names(x)) arrow::write_parquet(x, file_dir)
+    if (is.null(partitioning)) 
+      arrow::write_parquet(x = x, 
+                           sink = file_dir, 
+                           ...)
     
-    else arrow::write_dataset(x, file_dir, partitioning = partitioning)
+    else 
+      arrow::write_dataset(dataset = x, 
+                           path = file_dir, 
+                           partitioning = partitioning, 
+                           existing_data_behavior = "delete_matching", 
+                           ...)
+    
+    # Save as Rds file 
+  } else if (class(x)[1] == "list" && list_as_folders) { 
+    
+    .save_objects_recursively(object = x, 
+                              name = paste0(file, ".parquetlist"), 
+                              dir = dir, 
+                              silent = silent, 
+                              redo = redo, 
+                              list_as_folders = list_as_folders, 
+                              clean_memory = clean_memory, 
+                              partitioning = partitioning, 
+                              ...) 
     
   } else {
     
-    if (!stringr::str_detect(tolower(file_dir), "rds")) 
+    if (!stringr::str_detect(tolower(file_dir), "\\.rds$")) 
       file_dir <- paste0(file_dir, ".Rds")
     
     if (!silent) {
@@ -78,7 +139,7 @@ write_data <- function(x, file, dir, dir.create = F, clean_memory = F, silent = 
       }
     }
     
-    saveRDS(x, file_dir)
+    saveRDS(x, file_dir, ...)
     
   }
   
@@ -91,22 +152,38 @@ write_data <- function(x, file, dir, dir.create = F, clean_memory = F, silent = 
 }
 
 
-#' Loads data from a file name 
+#' Loads data from a file name or returns if already in R
 #'
 #' @param file file name 
+#' @param fallback other file name or alternative way to provide the input - 
+#' useful if file is an R object and fallback is a hardcoded string 
 #' @param recursive Should data be recursively loaded?
 #' @param credit how many recursive steps are allowed 
 #' @param as_arrow_table return a tibble or an Arrow connection 
+#' @param ... additional arguments 
 #'
 #' @returns
 #' @export
 #'
 #' @examples
 get_data <- function(file, 
+                     fallback, 
                      recursive = T, 
                      credit = 10, 
                      as_arrow_table = F, 
                      ...) {
+  
+  # Check if input is given or if fallback options is given 
+  if (missing(file) || tryCatch(is.null(file), 
+                                error = function(e) TRUE)) {
+    
+    if (missing(fallback)) {
+      stop("No <file> or <fallback> file argument given.")
+    } else {
+      file <- fallback
+    }
+    
+  }
   
   if (length(file) > 1) {
     
@@ -118,6 +195,13 @@ get_data <- function(file,
       
       if (class(file)[1] == "list") data_object <- purrr::map(file, get_data)
       else data_object <- file
+      
+    } else if (tolower(tools::file_ext(file)) == "parquetlist") {
+      
+      data_object <- .read_objects_recursively(name = file, 
+                                               silent = T, 
+                                               as_arrow_table = as_arrow_table, 
+                                               ...)
       
     } else if (tolower(tools::file_ext(file)) == "parquet") {
       
@@ -158,6 +242,8 @@ get_data <- function(file,
 #' Loads data from a file name 
 #'
 #' @param file file name 
+#' @param fallback other file name or alternative way to provide the input - 
+#' useful if file is an R object and fallback is a hardcoded string 
 #' @param recursive Should data be recursively loaded?
 #' @param credit how many recursive steps are allowed 
 #'
@@ -166,9 +252,22 @@ get_data <- function(file,
 #'
 #' @examples
 open_data <- function(file, 
-                     recursive = T, 
-                     credit = 10, 
-                     ...) {
+                      fallback, 
+                      recursive = T, 
+                      credit = 10, 
+                      ...) {
+  
+  # Check if input is given or if fallback options is given 
+  if (missing(file) || tryCatch(is.null(file), 
+                                error = function(e) TRUE)) {
+    
+    if (missing(fallback)) {
+      stop("No <file> or <fallback> file argument given.")
+    } else {
+      file <- fallback
+    }
+    
+  }
   
   if (length(file) > 1) {
     
@@ -185,8 +284,8 @@ open_data <- function(file,
       
       if (recursive) data_object <- readRDS(file) %>% 
           open_data(recursive = credit - 1 > 0, 
-                   credit = credit - 1, 
-                   ...)
+                    credit = credit - 1, 
+                    ...)
       
       else data_object <- readRDS(file)
       
@@ -273,21 +372,31 @@ tempdir_remove <- function(dir = tempdir(), pattern = ".Rds|.parquet") {
 }
 
 
-
-
-
 #' Title
 #'
 #' @param object 
 #' @param name 
 #' @param dir 
 #' @param silent 
+#' @param redo 
+#' @param list_as_folders 
+#' @param clean_memory 
+#' @param partitioning 
+#' @param ... 
 #'
 #' @returns
 #' @export
 #'
 #' @examples
-.save_objects_recursively <- function(object, name, dir, silent = F) {
+.save_objects_recursively <- function(object, 
+                                      name, 
+                                      dir, 
+                                      silent = F, 
+                                      redo = T, 
+                                      list_as_folders = T, 
+                                      clean_memory = F, 
+                                      partitioning = NULL, 
+                                      ...) {
   
   if (class(object)[1] == "list") {
     if (!silent) cat(paste0('Creating folder "', 
@@ -298,60 +407,27 @@ tempdir_remove <- function(dir = tempdir(), pattern = ".Rds|.parquet") {
     for (j in names(object)) {
       .save_objects_recursively(object = object[[j]], 
                                 name = j, 
-                                dir = file.path(dir, name))
+                                dir = file.path(dir, name), 
+                                list_as_folders = list_as_folders, 
+                                clean_memory = clean_memory, 
+                                silent = silent, 
+                                partitioning = partitioning, 
+                                ...)
     }
-  } else if (class(object)[1] %in% c("tbl_df", "tbl")) {
-    if (!silent) cat(paste0('Saving file "', 
-                            file.path(dir, paste0(name, ".parquet")), 
-                            '".'))
-    arrow::write_parquet(object, 
-                         file.path(dir, paste0(name, ".parquet")))
-    if (!silent) cat(" Done!\n")
   } else {
-    if (!silent) cat(paste0('Saving file "', 
-                            file.path(dir, paste0(name, ".Rds")), 
-                            '".'))
-    saveRDS(object, 
-            file.path(dir, paste0(name, ".Rds")))
-    if (!silent) cat(" Done!\n")
+    
+    write_data(x = object, 
+               file = name, 
+               dir = dir, 
+               redo = redo, 
+               list_as_folders = list_as_folders, 
+               clean_memory = clean_memory, 
+               silent = silent, 
+               partitioning = partitioning, 
+               ...)
+    
   }
   return(invisible(T))
-}
-
-
-#' Title
-#'
-#' @param objects 
-#' @param dir 
-#' @param silent 
-#'
-#' @returns
-#' @export
-#'
-#' @examples
-save_objects <- function(objects = c("Analysis", 
-                                     "Datasets", 
-                                     "Info"), 
-                         dir = "Data/RData/temp", 
-                         silent = F) {
-  
-  message(paste0('Starting to save following files under "', 
-                 dir, 
-                 '":\n', 
-                 paste(paste0("-", objects), collapse = "\n")))
-  
-  if (!dir.exists(dir)) dir.create(dir, recursive = T)
-  
-  for (i in objects) {
-    if (!exists(i)) warning(i, "  not found.")
-    else .save_objects_recursively(object = eval(parse(text = i)), 
-                                   name = i, 
-                                   dir = dir, 
-                                   silent = F)
-  }
-  
-  message("All done!")
-  
 }
 
 
@@ -366,19 +442,27 @@ save_objects <- function(objects = c("Analysis",
 #' @export
 #'
 #' @examples
-.read_objects_recursively <- function(name, dir, exclude = NULL, silent = F) {
+.read_objects_recursively <- function(name, 
+                                      dir, 
+                                      exclude = NULL, 
+                                      silent = F, 
+                                      as_arrow_table = F, 
+                                      ...) {
   
-  if (dir.exists(file.path(dir, name))) {
+  if (hasArg(dir)) file_dir <- file.path(dir, name)
+  else file_dir <- name
+  
+  if (dir.exists(file_dir)) {
     data_object <- list()
-    sub <- list.files(file.path(dir, name))
-    sub <- sub[list.files(file.path(dir, name), full.names = T) %>% 
+    sub <- list.files(file_dir)
+    sub <- sub[list.files(file_dir, full.names = T) %>% 
                  purrr::map_chr(\(x) as.character(file.info(x)$ctime)) %>% 
                  order()]
     for (j in sub) {
       
       data_object[[tools::file_path_sans_ext(j)]] <- 
         .read_objects_recursively(name = j, 
-                                  dir = file.path(dir, name), 
+                                  dir = file_dir, 
                                   exclude = if (!is.null(exclude) && 
                                                 stringr::str_detect(name, exclude))
                                     paste(exclude, j, sep = "|")
@@ -389,11 +473,14 @@ save_objects <- function(objects = c("Analysis",
     
   } else if (!is.null(exclude) && stringr::str_detect(name, exclude)) {
     
-    data_object <- file.path(dir, name)
+    data_object <- file_dir
     
   } else {
     
-    data_object <- get_data(file.path(dir, name), recursive = F)
+    data_object <- get_data(file_dir, 
+                            recursive = F, 
+                            as_arrow_table = as_arrow_table, 
+                            ...)
     
   } 
   

@@ -127,64 +127,6 @@ get_data_frame <- function(which,
 }
 
 
-#' Title
-#'
-#' @param data_frame 
-#' @param data_frame_preview 
-#' @param dataset 
-#' @param name 
-#' @param tag 
-#' @param n_preview 
-#' @param save_dir 
-#' @param partitioning 
-#' @param silent 
-#'
-#' @returns
-#' @export
-#'
-#' @examples
-.save_data_frame <- function(data_frame, 
-                             data_frame_preview, 
-                             dataset, 
-                             name = "file", 
-                             tag = "", 
-                             n_preview = 100, 
-                             save_dir, 
-                             partitioning, 
-                             silent = F) {
-  
-  # Check dataset 
-  dataset <- get_dataset(dataset)
-  
-  if (!hasArg(save_dir)) 
-    save_dir <- tempdir()
-  
-  else if (!dir.exists(file.path(save_dir, dataset)))
-    stop ('Dataset directory does not exist. Use .add_dataset("', dataset, '")')
-  
-  .Datasets[[dataset]][["Data_frames"]][[name]] <<- 
-    write_data(data_frame, 
-               file = paste0(dataset, 
-                             "/Data_frames/", 
-                             stringr::str_remove(paste0(name, tag), 
-                                                 "_$")), 
-               dir = save_dir, 
-               dir.create = ifelse(save_dir == tempdir(), T, F), 
-               partitioning = partitioning, 
-               silent = silent)
-  
-  if (!hasArg(data_frame_preview))
-    data_frame_preview <- head(data_frame, n_preview)
-  
-  Datasets[[dataset]][["Data_frames"]][[name]] <<- 
-    dplyr::collect(data_frame_preview)
-  
-  return(invisible(list(preview = Datasets[[dataset]][["Data_frames"]][[name]], 
-                        location = .Datasets[[dataset]][["Data_frames"]][[name]])))
-  
-}
-
-
 #' Assemble data frame from dataset 
 #'
 #' @param which specific name of data type
@@ -256,6 +198,67 @@ open_data_frame <- function(which,
 
 #' Title
 #'
+#' @param data_frame 
+#' @param data_frame_preview 
+#' @param dataset 
+#' @param name 
+#' @param tag 
+#' @param n_preview 
+#' @param save_dir 
+#' @param partitioning 
+#' @param silent 
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+.save_data_frame <- function(data_frame, 
+                             data_frame_preview, 
+                             dataset, 
+                             name = "file", 
+                             tag = "", 
+                             n_preview = 100, 
+                             save_dir, 
+                             partitioning = NULL, 
+                             silent = F) {
+  
+  # Check dataset 
+  dataset <- get_dataset(dataset)
+  
+  if (!hasArg(save_dir)) {
+    if (!is.null(.get_defaults("save_dir")))
+      save_dir <- .get_defaults("save_dir")
+    else 
+      save_dir <- tempdir()
+  }
+  
+  else if (!dir.exists(file.path(save_dir, dataset)))
+    stop ('Dataset directory does not exist. Use .add_dataset("', dataset, '")')
+  
+  .Datasets[[dataset]][["Data_frames"]][[name]] <<- 
+    write_data(data_frame, 
+               file = paste0(dataset, 
+                             "/Data_frames/", 
+                             stringr::str_remove(paste0(name, tag), 
+                                                 "_$")), 
+               dir = save_dir, 
+               partitioning = partitioning, 
+               silent = silent)
+  
+  if (!hasArg(data_frame_preview))
+    data_frame_preview <- head(data_frame, n_preview)
+  
+  Datasets[[dataset]][["Data_frames"]][[name]] <<- 
+    dplyr::collect(data_frame_preview)
+  
+  return(invisible(list(preview = Datasets[[dataset]][["Data_frames"]][[name]], 
+                        location = .Datasets[[dataset]][["Data_frames"]][[name]])))
+  
+}
+
+
+#' Title
+#'
 #' @param data 
 #' @param dataset 
 #' @param name 
@@ -274,7 +277,7 @@ save_data_frame <- function(data,
                             tag = "", 
                             n_preview = 100, 
                             save_dir, 
-                            partitioning) {
+                            partitioning = NULL) {
   
   # Check data input
   if (!hasArg(data)) stop("No data given.")
@@ -327,7 +330,7 @@ save_data_frame <- function(data,
                    tag = tag, 
                    n_preview = n_preview, 
                    save_dir = save_dir, 
-                   partitioning = partitioning, #= partitioning
+                   partitioning = partitioning, 
                    silent = F)
   
 }

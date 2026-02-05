@@ -11,7 +11,7 @@ save_data_frame(
   tag = "",
   n_preview = 100,
   save_dir,
-  partitioning
+  partitioning = NULL
 )
 }
 \arguments{

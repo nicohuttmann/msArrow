@@ -198,9 +198,9 @@ add_variables_data <- function(data,
   
   # Add column/s
   if ("observations" %in% names(data)) {
-  data <- dplyr::left_join(data, variables_data, by = "variables") %>% 
-    dplyr::relocate(!!which, .after = c("observations", "variables")) %>% 
-    dplyr::compute()
+    data <- dplyr::left_join(data, variables_data, by = "variables") %>% 
+      dplyr::relocate(!!which, .after = c("observations", "variables")) %>% 
+      dplyr::compute()
   } else {
     data <- dplyr::left_join(data, variables_data, by = "variables") %>% 
       dplyr::relocate(!!which, .after = "variables") %>% 
@@ -238,8 +238,12 @@ add_variables_data <- function(data,
   # Check dataset 
   dataset <- get_dataset(dataset)
   
-  if (!hasArg(save_dir)) 
-    save_dir <- tempdir()
+  if (!hasArg(save_dir)) {
+    if (!is.null(.get_defaults("save_dir")))
+      save_dir <- .get_defaults("save_dir")
+    else 
+      save_dir <- tempdir()
+  }
   
   else if (!dir.exists(file.path(save_dir, dataset)))
     stop ('Dataset directory does not exist. Use .add_dataset("', dataset, '")')
@@ -251,7 +255,6 @@ add_variables_data <- function(data,
                              stringr::str_remove(paste0(name, tag), 
                                                  "_$")), 
                dir = save_dir, 
-               dir.create = ifelse(save_dir == tempdir(), T, F), 
                silent = F)
   
   if (!hasArg(variables_data_frame_preview))

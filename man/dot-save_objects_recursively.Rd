@@ -4,7 +4,17 @@
 \alias{.save_objects_recursively}
 \title{Title}
 \usage{
-.save_objects_recursively(object, name, dir, silent = F)
+.save_objects_recursively(
+  object,
+  name,
+  dir,
+  silent = F,
+  redo = T,
+  list_as_folders = T,
+  clean_memory = F,
+  partitioning = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{}
@@ -14,6 +24,16 @@
 \item{dir}{}
 
 \item{silent}{}
+
+\item{redo}{}
+
+\item{list_as_folders}{}
+
+\item{clean_memory}{}
+
+\item{partitioning}{}
+
+\item{...}{}
 }
 \description{
 Title

@@ -4,10 +4,13 @@
 \alias{open_data}
 \title{Loads data from a file name}
 \usage{
-open_data(file, recursive = T, credit = 10, ...)
+open_data(file, fallback, recursive = T, credit = 10, ...)
 }
 \arguments{
 \item{file}{file name}
+
+\item{fallback}{other file name or alternative way to provide the input -
+useful if file is an R object and fallback is a hardcoded string}
 
 \item{recursive}{Should data be recursively loaded?}
 

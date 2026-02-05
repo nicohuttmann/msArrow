@@ -2,33 +2,45 @@
 % Please edit documentation in R/get_write_data.R
 \name{write_data}
 \alias{write_data}
-\title{Title}
+\title{Writes data to a file or temporary file}
 \usage{
 write_data(
   x,
   file,
   dir,
-  dir.create = F,
+  redo = T,
+  list_as_folders = T,
   clean_memory = F,
-  silent = T,
-  partitioning
+  silent = F,
+  partitioning = NULL,
+  ...
 )
 }
 \arguments{
-\item{x}{}
+\item{x}{data to be saved}
 
-\item{file}{}
+\item{file}{file name (temporary file if not given; file ending will be
+determined automatically)}
 
-\item{dir}{}
+\item{dir}{(optional) folder name if easier to specify separate from file
+name}
 
-\item{dir.create}{}
+\item{redo}{Should the computation be skipped, if file of given name already
+exists? File name will still be returned.}
 
-\item{clean_memory}{}
+\item{clean_memory}{Should the memory be cleaned with gc()/cleanMem() afer
+writing}
 
-\item{silent}{}
+\item{silent}{Should messages be suppressed?}
 
-\item{partitioning}{}
+\item{partitioning}{Should the parquet file be split into}
+
+\item{...}{additional arguments for the saving function}
 }
 \description{
-Title
+\code{write_data()} decides whether to save the file in the .parquet format if
+possible or as an .Rds file and returns the final file path. If no file
+name is given, a temporary file will be saved. Depending on the file and
+arguments \code{arrow::write_parquet()}, \code{arrow::write_dataset()} or R's native
+\code{saveRDS()} will be used. If redo = F, the function checks if the computation can be skipped.
 }

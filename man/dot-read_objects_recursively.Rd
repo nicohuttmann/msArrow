@@ -4,7 +4,14 @@
 \alias{.read_objects_recursively}
 \title{Title}
 \usage{
-.read_objects_recursively(name, dir, exclude = NULL, silent = F)
+.read_objects_recursively(
+  name,
+  dir,
+  exclude = NULL,
+  silent = F,
+  as_arrow_table = F,
+  ...
+)
 }
 \arguments{
 \item{name}{}
