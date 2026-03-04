@@ -195,7 +195,8 @@ get_observations_data <- function(which,
 #'
 #'
 add_observations_data <- function(data,
-                                  which,
+                                  which, 
+                                  by = "observations", 
                                   dataset) {
   
   # return data if no observations data should be added
@@ -212,9 +213,15 @@ add_observations_data <- function(data,
   arrow_data <- any(stringr::str_detect(class(data), "(A|a)rrow"))
   
   # Get observations_data
-  observations_data <- get_observations_data(which = which, 
+  observations_data <- get_observations_data(which = c(by, which), 
                                              dataset = dataset, 
                                              as_arrow_table = arrow_data)
+  
+  if (by != "observations") {
+    observations_data <- observations_data %>% 
+      dplyr::select(dplyr::all_of(c(by, which))) %>% 
+      dplyr::distinct()
+  }
   
   # Check name argument
   if (any(!is.character(name) | name %in% names(data))) {
@@ -224,12 +231,12 @@ add_observations_data <- function(data,
   
   # Add column/s
   if ("variables" %in% names(data)) {
-    data <- dplyr::left_join(data, observations_data, by = "observations") %>% 
-      dplyr::relocate(!!which, .after = c("observations", "variables")) %>% 
+    data <- dplyr::left_join(data, observations_data, by = by) %>% 
+      dplyr::relocate(!!which, .after = c(by, "variables")) %>% 
       dplyr::compute()
   } else {
-    data <- dplyr::left_join(data, observations_data, by = "observations") %>% 
-      dplyr::relocate(!!which, .after = "observations") %>% 
+    data <- dplyr::left_join(data, observations_data, by = by) %>% 
+      dplyr::relocate(!!which, .after = by) %>% 
       dplyr::compute()
   }
   
@@ -371,8 +378,12 @@ save_observations_data <- function(data,
     } else {
       
       # Get template
-      template <- template %>% 
-        dplyr::select(-dplyr::any_of(columns))
+      if (is.null(names(columns)))
+        template <- template %>% 
+          dplyr::select(-dplyr::any_of(columns))
+      else 
+        template <- template %>% 
+          dplyr::select(-dplyr::any_of(names(columns)))
       
     }
     

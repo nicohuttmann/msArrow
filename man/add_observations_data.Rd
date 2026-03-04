@@ -4,7 +4,7 @@
 \alias{add_observations_data}
 \title{Add observations data to data frame}
 \usage{
-add_observations_data(data, which, dataset)
+add_observations_data(data, which, by = "observations", dataset)
 }
 \arguments{
 \item{data}{data frame}

@@ -2,6 +2,7 @@
 #'
 #' @param file 
 #' @param name 
+#' @param channel 
 #' @param filter_by 
 #' @param observation_names 
 #' @param variables_data 
@@ -10,57 +11,55 @@
 #' @param preview_format 
 #' @param save_dir 
 #' @param partition_by_run 
-#' @param silent 
 #'
 #' @returns
 #' @export
 #'
 #' @examples
 import_diann <- function(file = "report.parquet", 
-                         name = "Precursors", 
-                         filter_by = Proteotypic == 1 & Decoy == 0, 
-                         observation_names = list(pattern = ".+"), 
-                         variables_data = "default", 
-                         data_frames = "default", 
-                         preview_precursors = c("all", "top100"), 
-                         preview_format = c("wide_obs", "wide_vars", "long"), 
-                         save_dir, 
-                         partition_by_run = F, 
-                         silent = F) {
+                                 name = "Precursors", 
+                                 filter_by = Proteotypic == 1 & Decoy == 0, 
+                                 observation_names = list(pattern = ".+"), 
+                                 variables_data = "default", 
+                                 data_frames = "default", 
+                                 preview_precursors = c("all", "top100"), 
+                                 preview_format = c("wide_obs", "wide_vars", "long"), 
+                                 save_dir, 
+                                 partition_by_run = F, 
+                                 silent = F) {
   
-  if (!silent) if (!silent) message("Step 1/5: Start")
+  
+  if (!silent) message(paste0("Dataset: ", name))
+  
+  if (!silent) message(paste0("File: ", file))
+  
+  if (!silent) message("Step 1/5: Start")
   
   data_filtered <- arrow::open_dataset(file)
+  
   
   # Defaults 
   
   # Variables data 
-  if (all(variables_data %in% names(.get_defaults("variables_data")))) 
-    variables_data <- .get_defaults("variables_data", variables_data) %>% 
-    intersect(names(data_filtered))
-  else 
-    variables_data <- variables_data %>% 
-    intersect(names(data_filtered))
+  if (all(variables_data %in% names(.get_defaults("variables_data")))) {
+    variables_data <- c(.get_defaults("variables_data", variables_data)) %>% 
+      intersect(names(data_filtered))
+  } else {
+    variables_data <- c(variables_data) %>% 
+      intersect(names(data_filtered))
+  }
   
   # Data frames 
-  if (all(data_frames %in% names(.get_defaults("data_frames")))) 
+  if (all(data_frames %in% names(.get_defaults("data_frames")))) {
     data_frames <- .get_defaults("data_frames", data_frames) %>% 
-    intersect(names(data_filtered))
-  else 
+      intersect(names(data_filtered))
+  } else {
     data_frames <- data_frames %>% 
-    intersect(names(data_filtered))
+      intersect(names(data_filtered))
+  }
   
   
   if (!silent) message("Step 2/5: Filtering")
-  
-  # Prefilter data 
-  if (partition_by_run) {
-    message("Partitioning ", file, ' by "Run".')
-    data_filtered <- data_filtered %>% 
-      write_data(partitioning = "Run") %>% 
-      open_data()
-  }
-  
   
   all_cols <- c("Run", 
                 "Precursor.Id", 
@@ -74,21 +73,52 @@ import_diann <- function(file = "report.parquet",
   data_filtered <- data_filtered %>% 
     dplyr::select(dplyr::all_of(all_cols)) %>% 
     dplyr::filter({{ filter_by }}) %>% 
+    dplyr::mutate(variables = Precursor.Id) %>% 
     dplyr::compute()
+  
+  
+  # if (!silent) message("Step 2.5/5: Modifying Precursor Ids")
+  # 
+  # # Add channel to Precursor.Id
+  # data_filtered <- data_filtered %>% 
+  #   dplyr::distinct(Precursor.Id, Channel) %>% 
+  #   dplyr::collect() %>% 
+  #   split(.$Channel) %>% 
+  #   purrr::imap(\(x, i) x %>% 
+  #                 dplyr::mutate(variables = 
+  #                                 stringr::str_replace_all(Precursor.Id, 
+  #                                                          channel, 
+  #                                                          paste0(channel, "-", i)))) %>% 
+  #   dplyr::bind_rows() %>% 
+  #   arrow::arrow_table() %>% 
+  #   dplyr::right_join(data_filtered, 
+  #                     by = c("Precursor.Id", "Channel")) %>% 
+  #   dplyr::arrange(Modified.Sequence) %>% 
+  #   dplyr::compute()
   
   
   if (!silent) message("Step 3/5: Extracting precursors and runs")
   
   # Variables data
   variables_data_frame <- data_filtered %>% 
-    dplyr::select(dplyr::any_of(c("variables" = "Precursor.Id", 
-                                  variables_data))) %>% 
+    dplyr::select(dplyr::any_of(c("variables", variables_data))) %>% 
     dplyr::distinct() %>% 
-    dplyr::collect()
+    dplyr::collect() #%>% 
+    # dplyr::mutate(Precursor.Channel.Group = 
+    #                 stringr::str_remove_all(variables, 
+    #                                         paste0("\\(", channel, "-.\\)")), 
+    #               Modified.Sequence = 
+    #                 stringr::str_sub(variables, 
+    #                                  1, 
+    #                                  nchar(variables) - 1), 
+    #               PTM.Modified.Sequence = 
+    #                 stringr::str_remove_all(Modified.Sequence, 
+    #                                         paste0("\\(", channel, "-.\\)")), 
+    #               .after = "Channel") 
   
   # Check row number 
   nrow_precursors <- data_filtered %>% 
-    dplyr::distinct(Precursor.Id) %>% 
+    dplyr::distinct(variables) %>% 
     dplyr::collect() %>% 
     nrow()
   
@@ -102,14 +132,15 @@ import_diann <- function(file = "report.parquet",
   }
   
   # Extract precursor preview data 
-  if (preview_precursors[1] == "all")
+  if (preview_precursors[1] == "all") {
     variables_data_frame_preview <- variables_data_frame
-  else if (preview_precursors[1] == "top100")
+  } else if (preview_precursors[1] == "top100") {
     variables_data_frame_preview <- variables_data_frame %>% 
-    dplyr::slice_head(n = 100) 
-  else 
+      dplyr::slice_head(n = 100) 
+  } else {
     variables_data_frame_preview <- variables_data_frame %>% 
-    dplyr::filter(Precursor.Id %in% preview_precursors)
+      dplyr::filter(Precursor.Id %in% preview_precursors)
+  }
   
   # Precursors to preview in data frames 
   vars <- variables_data_frame_preview %>% 
@@ -119,17 +150,18 @@ import_diann <- function(file = "report.parquet",
   
   # Extract names 
   if (!is.list(observation_names) || 
-      names(observation_names)[1] != "pattern" || 
-      "replace" %in% names(observation_names)) {
+      names(observation_names)[1] != "pattern") #|| 
+    #"replace" %in% names(observation_names)) 
+  {
     
-    warning("Sample names must be declared by a list with the arguments <pattern> and (optional) <replace>.")
+    message("Warning: Sample names must be declared by a list with the arguments <pattern> and (optional) <replace>.")
     
     observations_data <- data_filtered %>% 
       dplyr::distinct(Run) %>% 
       dplyr::mutate(observations = Run, .before = 1)
     
     
-    # Rename based on pattern 
+    # Extract names based on pattern 
   } else {
     
     # 
@@ -141,12 +173,38 @@ import_diann <- function(file = "report.parquet",
                                            observation_names$pattern), 
                     .before = 1) 
     
+    if (any(is.na(observations_data$observations))) {
+      observations_data <- observations_data %>% 
+        dplyr::mutate(observations = ifelse(is.na(observations), 
+                                            Run, 
+                                            observations))
+      message("Warning: Some sample names were not properly extracted and replaced with the original Run name.")
+    }
+    
     # Replace matched names by observation_names$replace
     if ("replace" %in% names(observation_names)) 
+      
+      # to_replace <- c(observation_names, 
+      #                 setdiff(observarions_data))
+      
       observations_data <- observations_data %>% 
-        dplyr::mutate(observations = 
-                        observation_names$replace[observations]) %>% 
+        dplyr::mutate(observations = ifelse(observations %in% names(observation_names$replace), 
+                                            observation_names$replace[observations], 
+                                            observations)) %>% 
         dplyr::arrange(observations)
+    
+  }
+  
+  # Check for duplicated names 
+  if (any(duplicated(observations_data$observations))) {
+    
+    message("Warning: Some sample names were duplicated and corrected. You can use a different <pattern> or <replace>.")
+    
+    while (any(duplicated(observations_data$observations)))
+      observations_data <- observations_data %>% 
+        dplyr::mutate(observations = ifelse(duplicated(observations), 
+                                            paste0(observations, "_dup"), 
+                                            observations))
     
   }
   
@@ -157,26 +215,22 @@ import_diann <- function(file = "report.parquet",
   data_frames_preview <- dplyr::inner_join(arrow::arrow_table(observations_data), 
                                            data_filtered %>% 
                                              dplyr::select(all_of(c("Run", 
-                                                                    "variables" = "Precursor.Id", 
+                                                                    "variables", 
                                                                     data_frames))) %>% 
                                              dplyr::inner_join(variables_data_frame_preview, 
                                                                by = "variables"), 
                                            by = "Run") %>% 
-    dplyr::select(dplyr::all_of(c("observations", 
-                                  "variables", 
-                                  data_frames))) %>% 
+    dplyr::select(-Run) %>% 
     dplyr::collect()
   
   
   data_filtered_c <- dplyr::inner_join(arrow::arrow_table(observations_data), 
                                        data_filtered %>% 
-                                         dplyr::select(dplyr::all_of(c("Run", 
-                                                                       "variables" = "Precursor.Id", 
-                                                                       data_frames))), 
+                                         dplyr::select(all_of(c("Run", 
+                                                                "variables", 
+                                                                data_frames))), 
                                        by = "Run") %>% 
-    dplyr::select(dplyr::all_of(c("observations", 
-                                  "variables", 
-                                  data_frames))) %>% 
+    dplyr::select(-Run) %>% 
     dplyr::compute()
   
   
@@ -184,90 +238,71 @@ import_diann <- function(file = "report.parquet",
   if (!silent) message("Step 5/5: Assembling dataset and saving")
   
   # Assemble background 
-  if (!exists(".Datasets", where = globalenv())) 
-    assign(".Datasets", list(), pos = globalenv())
+  .add_dataset(name = name, save_dir = save_dir)
   
-  .Datasets[[name]] <<- list(Variables = c(), 
-                             Observations = c(), 
-                             Data_frames = list())
+  .save_variables_data(variables_data_frame, 
+                       variables_data_frame_preview = variables_data_frame_preview, 
+                       dataset = name, 
+                       save_dir = save_dir)
   
-  .Datasets[[name]][["Variables"]] <<- write_data(variables_data_frame, 
-                                                  file = "Variables", 
-                                                  dir = file.path(save_dir, name), 
-                                                  silent = F)
-  
-  .Datasets[[name]][["Observations"]] <<- write_data(observations_data, 
-                                                     file = "Observations", 
-                                                     dir = file.path(save_dir, name), 
-                                                     silent = F)
-  
+  .save_observations_data(observations_data, 
+                          observations_data, 
+                          dataset = name, 
+                          save_dir = save_dir) 
   
   for (df in data_frames) {
     
-    if (!partition_by_run) 
-      .Datasets[[name]][["Data_frames"]][[df]] <<- 
-        write_data(x = data_filtered_c %>% 
-                     dplyr::select(dplyr::all_of(c("observations", 
-                                                   "variables", 
-                                                   df))), 
-                   file = stringr::str_replace_all(df, "\\.", "_"), 
-                   dir = file.path(save_dir, name, "Data_frames"), 
-                   silent = F)
-    
-    else
-      .Datasets[[name]][["Data_frames"]][[df]] <<- 
-        write_data(x = data_filtered_c %>% 
-                     dplyr::select(dplyr::all_of(c("observations", 
-                                                   "variables", 
-                                                   df))), 
-                   file = stringr::str_replace_all(df, "\\.", "_"), 
-                   dir = file.path(save_dir, name, "Data_frames"), 
-                   partitioning = "observations", silent = F)
+    .save_data_frame(data_frame = data_filtered_c %>% 
+                       dplyr::select(dplyr::all_of(c("observations", 
+                                                     "variables", 
+                                                     df))) %>% 
+                       dplyr::compute(), 
+                     data_frame_preview = data_frames_preview %>% 
+                       {if (match.arg(preview_format, c("wide_obs", 
+                                                        "wide_vars", 
+                                                        "long")) == "wide_obs")
+                         tidyr::pivot_wider(., 
+                                            id_cols = "observations", 
+                                            names_from = "variables", 
+                                            values_from = df)
+                         else if (match.arg(preview_format, c("wide_obs", 
+                                                              "wide_vars", 
+                                                              "long")) == "wide_vars")
+                           tidyr::pivot_wider(., 
+                                              id_cols = "variables", 
+                                              names_from = "observations", 
+                                              values_from = df)
+                         else if (match.arg(preview_format, c("wide_obs", 
+                                                              "wide_vars", 
+                                                              "long")) == "long")
+                           dplyr::select(., dplyr::all_of(c("observations", 
+                                                            "variables", 
+                                                            df)))
+                         else {
+                           warning('preview_format not supported. Using default "wide_obs".')
+                           tidyr::pivot_wider(., 
+                                              id_cols = "observations", 
+                                              names_from = "variables", 
+                                              values_from = df)
+                         }}, 
+                     dataset = name, 
+                     name = df, 
+                     save_dir = save_dir, 
+                     partitioning = 
+                       if (partition_by_run) "observations"
+                     else NULL, 
+                     silent = F)
     
   }
   
-  
-  # Assemble preview data 
-  list_preview <- 
-    list(Variables = variables_data_frame_preview, 
-         Observations = observations_data, 
-         Data_frames = 
-           purrr::map(cc(data_frames), \(df) {
-             data_frames_preview %>% 
-               {if (match.arg(preview_format, c("wide_obs", 
-                                                "wide_vars", 
-                                                "long")) == "wide_obs")
-                 tidyr::pivot_wider(., 
-                                    id_cols = "observations", 
-                                    names_from = "variables", 
-                                    values_from = df)
-                 else if (match.arg(preview_format, c("wide_obs", 
-                                                      "wide_vars", 
-                                                      "long")) == "wide_vars")
-                   tidyr::pivot_wider(., 
-                                      id_cols = "variables", 
-                                      names_from = "observations", 
-                                      values_from = df)
-                 else if (match.arg(preview_format, c("wide_obs", 
-                                                      "wide_vars", 
-                                                      "long")) == "long")
-                   dplyr::select(., dplyr::all_of(c("observations", 
-                                                    "variables", 
-                                                    df)))
-                 else {
-                   warning('preview_format not supported. Using default "wide_obs".')
-                   tidyr::pivot_wider(., 
-                                      id_cols = "observations", 
-                                      names_from = "variables", 
-                                      values_from = df)
-                 }}}
-           ))
-  
   message("Done.")
   
-  return(list_preview)
+  return(invisible(list(preview = .Datasets[[name]], 
+                        locations = Datasets[[name]])))
   
 }
+
+
 
 
 #' Title
@@ -366,7 +401,7 @@ import_diann_channel <- function(file = "report.parquet",
                 variables_data, 
                 data_frames, 
                 names(data_filtered)[
-                  stringr::str_detect(paste(rlang::as_label(dplyr::enquo(filter_by)), 
+                  stringr::str_detect(paste(rlang::expr_text(dplyr::enquo(filter_by)), 
                                             collapse = ""), 
                                       names(data_filtered))])
   
@@ -450,8 +485,8 @@ import_diann_channel <- function(file = "report.parquet",
   # Extract names 
   if (!is.list(observation_names) || 
       names(observation_names)[1] != "pattern") #|| 
-      #"replace" %in% names(observation_names)) 
-    {
+    #"replace" %in% names(observation_names)) 
+  {
     
     message("Warning: Sample names must be declared by a list with the arguments <pattern> and (optional) <replace>.")
     
@@ -488,8 +523,8 @@ import_diann_channel <- function(file = "report.parquet",
       
       observations_data <- observations_data %>% 
         dplyr::mutate(observations = ifelse(observations %in% names(observation_names$replace), 
-                        observation_names$replace[observations], 
-                        observations)) %>% 
+                                            observation_names$replace[observations], 
+                                            observations)) %>% 
         dplyr::arrange(observations)
     
   }
@@ -500,10 +535,10 @@ import_diann_channel <- function(file = "report.parquet",
     message("Warning: Some sample names were duplicated and corrected. You can use a different <pattern> or <replace>.")
     
     while (any(duplicated(observations_data$observations)))
-    observations_data <- observations_data %>% 
-      dplyr::mutate(observations = ifelse(duplicated(observations), 
-                                          paste0(observations, "_dup"), 
-                                          observations))
+      observations_data <- observations_data %>% 
+        dplyr::mutate(observations = ifelse(duplicated(observations), 
+                                            paste0(observations, "_dup"), 
+                                            observations))
     
   }
   

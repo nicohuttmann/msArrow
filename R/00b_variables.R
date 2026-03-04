@@ -344,8 +344,12 @@ save_variables_data <- function(data,
     } else {
       
       # Get template
+      if (is.null(names(columns)))
       template <- template %>% 
         dplyr::select(-dplyr::any_of(columns))
+      else 
+        template <- template %>% 
+          dplyr::select(-dplyr::any_of(names(columns)))
       
     }
     

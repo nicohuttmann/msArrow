@@ -39,7 +39,7 @@ import_diann(
 
 \item{partition_by_run}{}
 
-\item{silent}{}
+\item{channel}{}
 }
 \description{
 Title
