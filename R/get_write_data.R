@@ -207,7 +207,11 @@ get_data <- function(file,
       
       if (!as_arrow_table) {
         
-        data_object <- tibble::as_tibble(nanoparquet::read_parquet(file))
+        data_object <- tryCatch(tibble::as_tibble(nanoparquet::read_parquet(file)), 
+                                error = function(e) NULL)
+        
+        if (is.null(data_object)) 
+          data_object <- tibble::as_tibble(arrow::read_parquet(file))
         
       } else {
         
