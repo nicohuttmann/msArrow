@@ -170,6 +170,7 @@ get_variables_data <- function(which,
 #'
 add_variables_data <- function(data,
                                which,
+                               by = "variables", 
                                dataset) {
   
   # return data if no variables data should be added
@@ -186,9 +187,15 @@ add_variables_data <- function(data,
   arrow_object <- any(stringr::str_detect(class(data), "(A|a)rrow"))
   
   # Get variables_data
-  variables_data <- get_variables_data(which = which, 
+  variables_data <- get_variables_data(which = c(by, which), 
                                        dataset = dataset, 
                                        as_arrow_table = arrow_object)
+  
+  if (by != "variables") {
+    variables_data <- variables_data %>% 
+      dplyr::select(dplyr::all_of(c(by, which))) %>% 
+      dplyr::distinct()
+  }
   
   # Check name argument
   if (any(!is.character(name) | name %in% names(data))) {
@@ -198,12 +205,12 @@ add_variables_data <- function(data,
   
   # Add column/s
   if ("observations" %in% names(data)) {
-    data <- dplyr::left_join(data, variables_data, by = "variables") %>% 
-      dplyr::relocate(!!which, .after = c("observations", "variables")) %>% 
+    data <- dplyr::left_join(data, variables_data, by = by) %>% 
+      dplyr::relocate(!!which, .after = c("observations", by)) %>% 
       dplyr::compute()
   } else {
-    data <- dplyr::left_join(data, variables_data, by = "variables") %>% 
-      dplyr::relocate(!!which, .after = "variables") %>% 
+    data <- dplyr::left_join(data, variables_data, by = by) %>% 
+      dplyr::relocate(!!which, .after = by) %>% 
       dplyr::compute()
   }
   

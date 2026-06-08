@@ -47,6 +47,20 @@ fu <- function (x) {
 }
 
 
+#' F(actors) U(nique) S(orted) 
+#'
+#' @param x a vector
+#' @param decreasing sort in decreasing order (default=F)
+#'
+#' @return
+#' @export
+#'
+#' 
+fus <- function (x, decreasing = F) {
+  factor(x = x, levels = sort(unique(x), decreasing = decreasing))
+}
+
+
 #' Vector with elements as names
 #'
 #' @param ... 

@@ -4,7 +4,7 @@
 \alias{add_variables_data}
 \title{Add variables data to data frame}
 \usage{
-add_variables_data(data, which, dataset)
+add_variables_data(data, which, by = "variables", dataset)
 }
 \arguments{
 \item{data}{data frame}

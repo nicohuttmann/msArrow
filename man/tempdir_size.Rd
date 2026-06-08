@@ -4,10 +4,17 @@
 \alias{tempdir_size}
 \title{List size of all temporary files saved by write_data() when}
 \usage{
-tempdir_size(dir = tempdir(), pattern = ".Rds|.parquet", units = "auto_si")
+tempdir_size(
+  dir = tempdir(),
+  all.paths = F,
+  pattern = ".Rds|.parquet",
+  units = "auto_si"
+)
 }
 \arguments{
 \item{dir}{location of temporary files}
+
+\item{all.paths}{find all temporary folders}
 
 \item{pattern}{pattern/s for files to be removed}
 

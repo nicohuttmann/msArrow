@@ -68,9 +68,6 @@ get_dataset_names <- function() {
   
 }
 
-
-
-
 #' Title
 #'
 #' @param name 
@@ -119,3 +116,111 @@ get_dataset_names <- function() {
   return(invisible(TRUE))
   
 }
+
+
+#' Change name or copy data before saving the RData environment
+#'
+#' @param tag suffix for data names 
+#' @param copy.files should data frames with other names be copied (default = F)
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+retag_datasets <- function(tag = "_x", copy.files = FALSE) {
+  
+  if (tag == "_x") {
+    message("Please change the tag name.")
+    return(invisible(FALSE))
+  }
+  
+  for (.dataset in names(.Datasets)) {
+    
+    # Variables 
+    file <- .Datasets[[.dataset]][["Variables"]] 
+    
+    if (is.character(file)) {
+      
+      file.name <- basename(file)
+      
+      dir.name <- dirname(file)
+      
+      name <- tools::file_path_sans_ext(file.name)
+      
+      ext <- stringr::str_extract(file.name, "\\..+?$")
+      
+      new.file <- file.path(dir.name, paste0("variables", tag, ext))
+      
+      if (name == "variables") {
+        file.rename(file, new.file)
+      } else {
+        file.copy(file, new.file)
+      }
+      
+      .Datasets[[.dataset]][["Variables"]] <<- new.file
+      
+    }
+    
+    
+    # Observations 
+    file <- .Datasets[[.dataset]][["Observations"]] 
+    
+    if (is.character(file)) {
+      
+      file.name <- basename(file)
+      
+      dir.name <- dirname(file)
+      
+      name <- tools::file_path_sans_ext(file.name)
+      
+      ext <- stringr::str_extract(file.name, "\\..+?$")
+      
+      new.file <- file.path(dir.name, paste0("observations", tag, ext))
+      
+      if (name == "observations") {
+        file.rename(file, new.file)
+      } else {
+        file.copy(file, new.file)
+      }
+      
+      .Datasets[[.dataset]][["Observations"]] <<- new.file
+      
+    }
+    
+    # Data frames 
+    for (.data_frame in names(.Datasets[[.dataset]][["Data_frames"]])) {
+      
+      file <- .Datasets[[.dataset]][["Data_frames"]][[.data_frame]]
+      
+      if (is.character(file)) {
+        
+        file.name <- basename(file)
+        
+        dir.name <- dirname(file)
+        
+        name <- tools::file_path_sans_ext(file.name)
+        
+        ext <- stringr::str_remove(file.name, name)
+        
+        new.file <- file.path(dir.name, paste0(.data_frame, tag, ext))
+        
+        if (name == .data_frame) {
+          file.rename(file, new.file)
+        .Datasets[[.dataset]][["Data_frames"]][[.data_frame]] <<- new.file
+        } else if (copy.files) {
+          file.copy(file, new.file)
+        }
+        
+        
+      }
+      
+    }
+    
+  }
+  
+  message("Done.")
+  
+  return(invisible(TRUE))
+  
+}
+

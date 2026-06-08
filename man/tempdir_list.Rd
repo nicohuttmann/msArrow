@@ -4,10 +4,12 @@
 \alias{tempdir_list}
 \title{List all temporary files saved by write_data() when}
 \usage{
-tempdir_list(dir = tempdir(), pattern = ".Rds|.parquet")
+tempdir_list(dir = tempdir(), all.paths = F, pattern = ".Rds|.parquet|.pdf")
 }
 \arguments{
 \item{dir}{location of temporary files}
+
+\item{all.paths}{find all temporary folders}
 
 \item{pattern}{pattern/s for files to be removed}
 }

@@ -109,7 +109,7 @@ write_data <- function(x,
                            existing_data_behavior = "delete_matching", 
                            ...)
     
-    # Save as Rds file 
+    # Save list as parquetlist
   } else if (class(x)[1] == "list" && list_as_folders) { 
     
     .save_objects_recursively(object = x, 
@@ -122,6 +122,9 @@ write_data <- function(x,
                               partitioning = partitioning, 
                               ...) 
     
+    file_dir <- paste0(file_dir, ".parquetlist")
+    
+    # Save list as Rds file 
   } else {
     
     if (!stringr::str_detect(tolower(file_dir), "\\.rds$")) 
@@ -329,6 +332,7 @@ get_data_m <- function(file, recursive = T, credit = 0, .id = NULL) {
 #' List all temporary files saved by write_data() when 
 #'
 #' @param dir location of temporary files 
+#' @param all.paths find all temporary folders 
 #' @param pattern pattern/s for files to be removed 
 #'
 #' @returns
@@ -336,7 +340,10 @@ get_data_m <- function(file, recursive = T, credit = 0, .id = NULL) {
 #'
 #' @examples 
 #'   tempdir_list()
-tempdir_list <- function(dir = tempdir(), pattern = ".Rds|.parquet") {
+tempdir_list <- function(dir = tempdir(), 
+                         all.paths = F, 
+                         pattern = ".Rds|.parquet|.pdf") {
+  if (all.paths) dir <- dirname(dir)
   list.files(path = dir, pattern = pattern, full.names = T)
 }
 
@@ -344,6 +351,7 @@ tempdir_list <- function(dir = tempdir(), pattern = ".Rds|.parquet") {
 #' List size of all temporary files saved by write_data() when 
 #'
 #' @param dir location of temporary files 
+#' @param all.paths find all temporary folders 
 #' @param pattern pattern/s for files to be removed 
 #' @param units unit/s to use to represent file size 
 #'
@@ -353,8 +361,10 @@ tempdir_list <- function(dir = tempdir(), pattern = ".Rds|.parquet") {
 #' @examples 
 #'   tempdir_list()
 tempdir_size <- function(dir = tempdir(), 
+                         all.paths = F, 
                          pattern = ".Rds|.parquet", 
                          units = "auto_si") {
+  if (all.paths) dir <- dirname(dir)
   scales::label_bytes(units = "auto_si")(file.size(list.files(path = dir, 
                                                               pattern = pattern, 
                                                               full.names = T)))
@@ -364,6 +374,7 @@ tempdir_size <- function(dir = tempdir(),
 #' Removing all temporary files saved by write_data() when 
 #'
 #' @param dir location of temporary files 
+#' @param all.paths find all temporary folders 
 #' @param pattern pattern/s for files to be removed 
 #'
 #' @returns
@@ -371,7 +382,10 @@ tempdir_size <- function(dir = tempdir(),
 #'
 #' @examples 
 #'   tempdir_remove()
-tempdir_remove <- function(dir = tempdir(), pattern = ".Rds|.parquet") {
+tempdir_remove <- function(dir = tempdir(), 
+                           all.paths = F, 
+                           pattern = ".Rds|.parquet|.pdf") {
+  if (all.paths) dir <- dirname(dir)
   file.remove(list.files(path = dir, pattern = pattern, full.names = T))
 }
 
