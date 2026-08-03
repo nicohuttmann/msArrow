@@ -115,6 +115,52 @@ test_that("redo = F still works without <type>", {
 })
 
 
+test_that("return_path = F returns the data instead of the path", {
+
+  dir <- withr::local_tempdir()
+  d <- test_table()
+
+  out <- write_data(d, "keep", dir, type = "tsv", return_path = F, silent = T)
+
+  expect_equal(out, d)
+  expect_true(file.exists(file.path(dir, "keep.tsv")))
+})
+
+
+test_that("return_path = T (the default) returns the path", {
+
+  dir <- withr::local_tempdir()
+
+  expect_equal(write_data(test_table(), "p", dir, type = "tsv", silent = T),
+               file.path(dir, "p.tsv"))
+})
+
+
+test_that("return_path = F still writes every requested type", {
+
+  dir <- withr::local_tempdir()
+
+  out <- write_data(test_table(), "multi", dir, type = c("parquet", "tsv"),
+                    return_path = F, silent = T)
+
+  expect_equal(out, test_table())
+  expect_true(file.exists(file.path(dir, "multi.parquet")))
+  expect_true(file.exists(file.path(dir, "multi.tsv")))
+})
+
+
+test_that("return_path = F passes an Arrow object straight back", {
+
+  dir <- withr::local_tempdir()
+  tbl <- arrow::arrow_table(test_table())
+
+  out <- write_data(tbl, "arrow", dir, return_path = F, silent = T)
+
+  expect_s3_class(out, "ArrowTabular", exact = FALSE)
+  expect_true(file.exists(file.path(dir, "arrow.parquet")))
+})
+
+
 test_that("write_data() writes to a temporary file when file and dir are absent", {
 
   path <- write_data(test_table(), type = "tsv", silent = T)
