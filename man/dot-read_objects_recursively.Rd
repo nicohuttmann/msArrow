@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_write_data.R
 \name{.read_objects_recursively}
 \alias{.read_objects_recursively}
-\title{Title}
+\title{Reads a folder of files back into a nested list}
 \usage{
 .read_objects_recursively(
   name,
@@ -30,5 +30,5 @@
 the nested list rebuilt from the folder tree
 }
 \description{
-Title
+Reads a folder of files back into a nested list
 }

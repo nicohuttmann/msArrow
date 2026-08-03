@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_write_data.R
 \name{load_objects}
 \alias{load_objects}
-\title{Title}
+\title{Loads saved objects from one or several store directories}
 \usage{
 load_objects(
   dir = "",
@@ -27,5 +27,5 @@ load_objects(
 the list of read objects (invisibly)
 }
 \description{
-Title
+Loads saved objects from one or several store directories
 }

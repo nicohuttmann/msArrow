@@ -717,7 +717,7 @@ tempdir_remove <- function(dir = tempdir(),
 }
 
 
-#' Title
+#' Reads a folder of files back into a nested list
 #'
 #' @param name name of the folder or file to read
 #' @param dir folder the object lives in
@@ -777,7 +777,7 @@ tempdir_remove <- function(dir = tempdir(),
 }
 
 
-#' Title
+#' Loads saved objects from one or several store directories
 #'
 #' @param dir folder or folders to read
 #' @param objects names of the top-level objects to read

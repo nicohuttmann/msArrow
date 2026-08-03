@@ -2,10 +2,13 @@
 % Please edit documentation in R/import_diann.R
 \name{.add_defaults}
 \alias{.add_defaults}
-\title{Title}
+\title{Registers the default column sets used by the DIA-NN importers}
 \usage{
 .add_defaults()
 }
+\value{
+nothing; \code{Info$defaults} is created in the global environment
+}
 \description{
-Title
+Registers the default column sets used by the DIA-NN importers
 }

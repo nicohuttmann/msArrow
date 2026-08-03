@@ -1,4 +1,9 @@
 .Rproj.user
+.Rhistory
+.RData
 dev/
 Data/
+Output/
 .positai
+docs/
+inst/doc

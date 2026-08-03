@@ -195,7 +195,7 @@ open_data_frame <- function(which,
 }
 
 
-#' Title
+#' Writes a data frame of a dataset to disk
 #'
 #' @param data_frame long observations x variables frame to save
 #' @param data_frame_preview frame stored as the preview (default: first rows)

@@ -751,9 +751,9 @@ check_report <- function(file) {
 }
 
 
-#' Title
+#' Registers the default column sets used by the DIA-NN importers
 #'
-#' @returns
+#' @returns nothing; `Info$defaults` is created in the global environment
 #' @export
 #'
 #' @examples
@@ -814,7 +814,7 @@ check_report <- function(file) {
 }
 
 
-#' Title
+#' Returns a default column set used by the DIA-NN importers
 #'
 #' @param type default set to return ("variables_data" or "data_frames")
 #' @param name name of a single default within <type>

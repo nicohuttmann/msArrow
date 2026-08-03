@@ -2,7 +2,7 @@
 % Please edit documentation in R/00d_data_frames.R
 \name{.save_data_frame}
 \alias{.save_data_frame}
-\title{Title}
+\title{Writes a data frame of a dataset to disk}
 \usage{
 .save_data_frame(
   data_frame,
@@ -39,5 +39,5 @@
 a list with the stored preview and the file location (invisibly)
 }
 \description{
-Title
+Writes a data frame of a dataset to disk
 }

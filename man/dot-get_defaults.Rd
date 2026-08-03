@@ -2,7 +2,7 @@
 % Please edit documentation in R/import_diann.R
 \name{.get_defaults}
 \alias{.get_defaults}
-\title{Title}
+\title{Returns a default column set used by the DIA-NN importers}
 \usage{
 .get_defaults(type, name)
 }
@@ -15,5 +15,5 @@
 the requested defaults, or the whole list if \if{html}{\out{<type>}} is missing
 }
 \description{
-Title
+Returns a default column set used by the DIA-NN importers
 }
