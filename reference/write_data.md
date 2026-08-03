@@ -102,8 +102,8 @@ the pipeline on the parquet file and drops a readable .tsv next to it.
     write_data(file = "data_small", 
                dir = tempdir(), 
                type = c("parquet", "tsv"))
-#> Saving file "/tmp/RtmpvWSCNY/data_small.parquet". Done!
-#> Saving file "/tmp/RtmpvWSCNY/data_small.tsv". Done!
+#> Saving file "/tmp/RtmpPEIOjY/data_small.parquet". Done!
+#> Saving file "/tmp/RtmpPEIOjY/data_small.tsv". Done!
 
   get_data(data_small)
 #> # A tibble: 3 × 2
