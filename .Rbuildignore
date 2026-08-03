@@ -7,3 +7,4 @@ dev/
 ^Data$
 ^\.Rhistory$
 ^\.github$
+^LICENSE\.md$

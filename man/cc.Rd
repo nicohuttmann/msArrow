@@ -7,7 +7,10 @@
 cc(...)
 }
 \arguments{
-\item{...}{}
+\item{...}{vector/s whose elements become their own names}
+}
+\value{
+a character vector named by its own elements
 }
 \description{
 Vector with elements as names

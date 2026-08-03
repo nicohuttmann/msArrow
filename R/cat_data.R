@@ -75,10 +75,8 @@
 #'
 #' @param FUN function
 #' @param add.equal.sign add equal sign to add arguments
-#' @param print print function snippet to console
-#' @param copy2clipboard copy function snippet to clipboard
 #'
-#' @return
+#' @returns FALSE if <FUN> is not a function, otherwise the snippet is printed
 #' @export
 #'
 #'

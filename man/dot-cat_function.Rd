@@ -10,10 +10,9 @@
 \item{FUN}{function}
 
 \item{add.equal.sign}{add equal sign to add arguments}
-
-\item{print}{print function snippet to console}
-
-\item{copy2clipboard}{copy function snippet to clipboard}
+}
+\value{
+FALSE if \if{html}{\out{<FUN>}} is not a function, otherwise the snippet is printed
 }
 \description{
 Prints function snippet to console and clipboard

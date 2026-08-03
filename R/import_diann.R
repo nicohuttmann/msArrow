@@ -1,22 +1,23 @@
-#' Title
+#' Imports a DIA-NN report into a dataset store
 #'
-#' @param file 
-#' @param name 
-#' @param channel 
-#' @param filter_by 
-#' @param observation_names 
-#' @param variables_data 
-#' @param data_frames 
-#' @param preview_precursors 
-#' @param preview_format 
-#' @param save_dir 
-#' @param partition_by_run 
+#' @param file path to a DIA-NN report (parquet or tsv)
+#' @param name name of the dataset to create
+#' @param filter_by expression used to filter the report rows
+#' @param observation_names list describing how run names become observations
+#' @param variables_data name of a default column set, or column names
+#' @param data_frames name of a default quantity set, or column names
+#' @param preview_precursors how many precursors to keep in the preview
+#' @param preview_format shape of the preview ("wide_obs", "wide_vars", "long")
+#' @param save_dir folder the dataset store is written to
+#' @param partition_by_run partition the saved data frames by run
+#' @param silent Should messages be suppressed?
 #'
-#' @returns
+#' @returns TRUE (invisibly); the dataset is written to <save_dir> and
+#' registered in Datasets/.Datasets
 #' @export
 #'
 #' @examples
-import_diann <- function(file = "report.parquet", 
+import_diann <- function(file = "report.parquet",
                                  name = "Precursors", 
                                  filter_by = Proteotypic == 1 & Decoy == 0, 
                                  observation_names = list(pattern = ".+"), 
@@ -214,7 +215,7 @@ import_diann <- function(file = "report.parquet",
   # Data_frames 
   data_frames_preview <- dplyr::inner_join(arrow::arrow_table(observations_data), 
                                            data_filtered %>% 
-                                             dplyr::select(all_of(c("Run", 
+                                             dplyr::select(dplyr::all_of(c("Run", 
                                                                     "variables", 
                                                                     data_frames))) %>% 
                                              dplyr::inner_join(variables_data_frame_preview, 
@@ -226,7 +227,7 @@ import_diann <- function(file = "report.parquet",
   
   data_filtered_c <- dplyr::inner_join(arrow::arrow_table(observations_data), 
                                        data_filtered %>% 
-                                         dplyr::select(all_of(c("Run", 
+                                         dplyr::select(dplyr::all_of(c("Run", 
                                                                 "variables", 
                                                                 data_frames))), 
                                        by = "Run") %>% 
@@ -264,14 +265,14 @@ import_diann <- function(file = "report.parquet",
                          tidyr::pivot_wider(., 
                                             id_cols = "observations", 
                                             names_from = "variables", 
-                                            values_from = df)
+                                            values_from = dplyr::all_of(df))
                          else if (match.arg(preview_format, c("wide_obs", 
                                                               "wide_vars", 
                                                               "long")) == "wide_vars")
                            tidyr::pivot_wider(., 
                                               id_cols = "variables", 
                                               names_from = "observations", 
-                                              values_from = df)
+                                              values_from = dplyr::all_of(df))
                          else if (match.arg(preview_format, c("wide_obs", 
                                                               "wide_vars", 
                                                               "long")) == "long")
@@ -283,7 +284,7 @@ import_diann <- function(file = "report.parquet",
                            tidyr::pivot_wider(., 
                                               id_cols = "observations", 
                                               names_from = "variables", 
-                                              values_from = df)
+                                              values_from = dplyr::all_of(df))
                          }}, 
                      dataset = name, 
                      name = df, 
@@ -305,25 +306,27 @@ import_diann <- function(file = "report.parquet",
 
 
 
-#' Title
+#' Imports a channel-labelled (e.g. SILAC) DIA-NN report into a dataset store
 #'
-#' @param file 
-#' @param name 
-#' @param channel 
-#' @param filter_by 
-#' @param observation_names 
-#' @param variables_data 
-#' @param data_frames 
-#' @param preview_precursors 
-#' @param preview_format 
-#' @param save_dir 
-#' @param partition_by_run 
+#' @param file path to a DIA-NN report (parquet or tsv)
+#' @param name name of the dataset to create
+#' @param channel name of the channel column
+#' @param filter_by expression used to filter the report rows
+#' @param observation_names list describing how run names become observations
+#' @param variables_data name of a default column set, or column names
+#' @param data_frames name of a default quantity set, or column names
+#' @param preview_precursors how many precursors to keep in the preview
+#' @param preview_format shape of the preview ("wide_obs", "wide_vars", "long")
+#' @param save_dir folder the dataset store is written to
+#' @param partition_by_run partition the saved data frames by run
+#' @param silent Should messages be suppressed?
 #'
-#' @returns
+#' @returns TRUE (invisibly); the dataset is written to <save_dir> and
+#' registered in Datasets/.Datasets
 #' @export
 #'
 #' @examples
-import_diann_channel <- function(file = "report.parquet", 
+import_diann_channel <- function(file = "report.parquet",
                                  name = "Precursors", 
                                  channel = "Channel", 
                                  filter_by = Proteotypic == 1 & Decoy == 0, 
@@ -548,7 +551,7 @@ import_diann_channel <- function(file = "report.parquet",
   # Data_frames 
   data_frames_preview <- dplyr::inner_join(arrow::arrow_table(observations_data), 
                                            data_filtered %>% 
-                                             dplyr::select(all_of(c("Run", 
+                                             dplyr::select(dplyr::all_of(c("Run", 
                                                                     "variables", 
                                                                     data_frames))) %>% 
                                              dplyr::inner_join(variables_data_frame_preview, 
@@ -560,7 +563,7 @@ import_diann_channel <- function(file = "report.parquet",
   
   data_filtered_c <- dplyr::inner_join(arrow::arrow_table(observations_data), 
                                        data_filtered %>% 
-                                         dplyr::select(all_of(c("Run", 
+                                         dplyr::select(dplyr::all_of(c("Run", 
                                                                 "variables", 
                                                                 data_frames))), 
                                        by = "Run") %>% 
@@ -598,14 +601,14 @@ import_diann_channel <- function(file = "report.parquet",
                          tidyr::pivot_wider(., 
                                             id_cols = "observations", 
                                             names_from = "variables", 
-                                            values_from = df)
+                                            values_from = dplyr::all_of(df))
                          else if (match.arg(preview_format, c("wide_obs", 
                                                               "wide_vars", 
                                                               "long")) == "wide_vars")
                            tidyr::pivot_wider(., 
                                               id_cols = "variables", 
                                               names_from = "observations", 
-                                              values_from = df)
+                                              values_from = dplyr::all_of(df))
                          else if (match.arg(preview_format, c("wide_obs", 
                                                               "wide_vars", 
                                                               "long")) == "long")
@@ -617,7 +620,7 @@ import_diann_channel <- function(file = "report.parquet",
                            tidyr::pivot_wider(., 
                                               id_cols = "observations", 
                                               names_from = "variables", 
-                                              values_from = df)
+                                              values_from = dplyr::all_of(df))
                          }}, 
                      dataset = name, 
                      name = df, 
@@ -637,11 +640,11 @@ import_diann_channel <- function(file = "report.parquet",
 }
 
 
-#' Title
+#' Summarises a DIA-NN report without importing it
 #'
-#' @param file 
+#' @param file path to a DIA-NN report (parquet or tsv)
 #'
-#' @returns
+#' @returns a list of summary statistics, including the file schema (invisibly)
 #' @export
 #'
 #' @examples
@@ -813,10 +816,10 @@ check_report <- function(file) {
 
 #' Title
 #'
-#' @param type 
-#' @param name 
+#' @param type default set to return ("variables_data" or "data_frames")
+#' @param name name of a single default within <type>
 #'
-#' @returns
+#' @returns the requested defaults, or the whole list if <type> is missing
 #' @export
 #'
 #' @examples

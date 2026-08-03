@@ -16,8 +16,9 @@ open_data_frame(which, variables, observations, dataset, ...)
 \item{dataset}{dataset name}
 
 \item{...}{additional arguments for open_data()}
-
-\item{output.type}{data type (default = "tibble", "data.frame", "matrix")}
+}
+\value{
+a lazy Arrow connection to the assembled data frame
 }
 \description{
 Assemble data frame from dataset

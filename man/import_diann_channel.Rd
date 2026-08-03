@@ -2,7 +2,7 @@
 % Please edit documentation in R/import_diann.R
 \name{import_diann_channel}
 \alias{import_diann_channel}
-\title{Title}
+\title{Imports a channel-labelled (e.g. SILAC) DIA-NN report into a dataset store}
 \usage{
 import_diann_channel(
   file = "report.parquet",
@@ -20,28 +20,34 @@ import_diann_channel(
 )
 }
 \arguments{
-\item{file}{}
+\item{file}{path to a DIA-NN report (parquet or tsv)}
 
-\item{name}{}
+\item{name}{name of the dataset to create}
 
-\item{channel}{}
+\item{channel}{name of the channel column}
 
-\item{filter_by}{}
+\item{filter_by}{expression used to filter the report rows}
 
-\item{observation_names}{}
+\item{observation_names}{list describing how run names become observations}
 
-\item{variables_data}{}
+\item{variables_data}{name of a default column set, or column names}
 
-\item{data_frames}{}
+\item{data_frames}{name of a default quantity set, or column names}
 
-\item{preview_precursors}{}
+\item{preview_precursors}{how many precursors to keep in the preview}
 
-\item{preview_format}{}
+\item{preview_format}{shape of the preview ("wide_obs", "wide_vars", "long")}
 
-\item{save_dir}{}
+\item{save_dir}{folder the dataset store is written to}
 
-\item{partition_by_run}{}
+\item{partition_by_run}{partition the saved data frames by run}
+
+\item{silent}{Should messages be suppressed?}
+}
+\value{
+TRUE (invisibly); the dataset is written to <save_dir> and
+registered in Datasets/.Datasets
 }
 \description{
-Title
+Imports a channel-labelled (e.g. SILAC) DIA-NN report into a dataset store
 }

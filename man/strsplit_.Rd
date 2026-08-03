@@ -13,7 +13,7 @@ strsplit_(x, split, vector.output = T, as_numeric = F)
 
 \item{vector.output}{output type (T = vector; F = list)}
 
-\item{as.numeric}{try to convert to numeric}
+\item{as_numeric}{try to convert to numeric}
 }
 \description{
 Same as strsplit but option to return as vector and to convert to numeric

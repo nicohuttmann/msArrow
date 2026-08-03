@@ -2,7 +2,7 @@
 % Please edit documentation in R/00c_observations.R
 \name{.save_observations_data}
 \alias{.save_observations_data}
-\title{Title}
+\title{Writes the observations data of a dataset to disk}
 \usage{
 .save_observations_data(
   observations_data_frame,
@@ -16,22 +16,25 @@
 )
 }
 \arguments{
-\item{observations_data_frame}{}
+\item{observations_data_frame}{observations data to save}
 
-\item{observations_data_frame_preview}{}
+\item{observations_data_frame_preview}{frame stored as the preview}
 
-\item{name}{}
+\item{name}{name the frame is stored under}
 
-\item{tag}{}
+\item{tag}{suffix appended to the file name}
 
-\item{dataset}{}
+\item{dataset}{dataset name}
 
-\item{n_preview}{}
+\item{n_preview}{number of rows kept in the preview}
 
-\item{save_dir}{}
+\item{save_dir}{folder the dataset store lives in}
 
-\item{silent}{}
+\item{silent}{Should messages be suppressed?}
+}
+\value{
+a list with the stored preview and the file location (invisibly)
 }
 \description{
-Title
+Writes the observations data of a dataset to disk
 }

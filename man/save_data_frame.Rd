@@ -2,7 +2,7 @@
 % Please edit documentation in R/00d_data_frames.R
 \name{save_data_frame}
 \alias{save_data_frame}
-\title{Title}
+\title{Saves a data frame into a dataset store}
 \usage{
 save_data_frame(
   data,
@@ -15,20 +15,23 @@ save_data_frame(
 )
 }
 \arguments{
-\item{data}{}
+\item{data}{long observations x variables frame to save}
 
-\item{dataset}{}
+\item{dataset}{dataset name}
 
-\item{name}{}
+\item{name}{name the frame is stored under}
 
-\item{tag}{}
+\item{tag}{suffix appended to the file name}
 
-\item{n_preview}{}
+\item{n_preview}{number of rows kept in the preview}
 
-\item{save_dir}{}
+\item{save_dir}{folder the dataset store lives in}
 
-\item{partitioning}{}
+\item{partitioning}{columns to partition the parquet dataset by}
+}
+\value{
+a list with the stored preview and the file location (invisibly)
 }
 \description{
-Title
+Saves a data frame into a dataset store
 }

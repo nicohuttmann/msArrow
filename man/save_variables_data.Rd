@@ -2,7 +2,7 @@
 % Please edit documentation in R/00b_variables.R
 \name{save_variables_data}
 \alias{save_variables_data}
-\title{Title}
+\title{Adds or updates variables data in a dataset}
 \usage{
 save_variables_data(
   data,
@@ -17,18 +17,21 @@ save_variables_data(
 \arguments{
 \item{data}{variables data as tibble or Arrow object}
 
-\item{columns}{}
+\item{columns}{columns of \if{html}{\out{<data>}} to store (default: all but "variables")}
 
-\item{name}{}
+\item{name}{name the frame is stored under}
 
-\item{tag}{}
+\item{tag}{suffix appended to the file name}
 
-\item{dataset}{}
+\item{dataset}{dataset name}
 
-\item{n_preview}{}
+\item{n_preview}{number of rows kept in the preview}
 
-\item{save_dir}{}
+\item{save_dir}{folder the dataset store lives in}
+}
+\value{
+a list with the stored preview and the file location (invisibly)
 }
 \description{
-Title
+Adds or updates variables data in a dataset
 }

@@ -9,9 +9,14 @@ add_observations_data(data, which, by = "observations", dataset)
 \arguments{
 \item{data}{data frame}
 
-\item{which}{observations data}
+\item{which}{observations data columns to add}
+
+\item{by}{column of the observations data to join on (default "observations")}
 
 \item{dataset}{dataset}
+}
+\value{
+the data frame with the requested observations data columns added
 }
 \description{
 Add observations data to data frame

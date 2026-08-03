@@ -668,10 +668,12 @@ tempdir_remove <- function(dir = tempdir(),
                                       ...) {
   
   if (class(object)[1] == "list") {
-    if (!silent) cat(paste0('Creating folder "', 
-                            file.path(dir, name), 
+    if (!silent) cat(paste0('Creating folder "',
+                            file.path(dir, name),
                             '".'))
-    dir.create(file.path(dir, name))
+    # re-running a pipeline writes into an existing folder, which is not a problem
+    if (!dir.exists(file.path(dir, name)))
+      dir.create(file.path(dir, name), recursive = T)
     if (!silent) cat(" Done!\n")
     for (j in names(object)) {
       .save_objects_recursively(object = object[[j]], 
@@ -717,16 +719,18 @@ tempdir_remove <- function(dir = tempdir(),
 
 #' Title
 #'
-#' @param name 
-#' @param dir 
-#' @param exclude 
-#' @param silent 
+#' @param name name of the folder or file to read
+#' @param dir folder the object lives in
+#' @param exclude pattern of entries to return as a path instead of reading
+#' @param silent Should messages be suppressed?
+#' @param as_arrow_table return tibbles or Arrow connections
+#' @param ... additional arguments for the reading function
 #'
-#' @returns
+#' @returns the nested list rebuilt from the folder tree
 #' @export
 #'
 #' @examples
-.read_objects_recursively <- function(name, 
+.read_objects_recursively <- function(name,
                                       dir, 
                                       exclude = NULL, 
                                       silent = F, 
@@ -775,16 +779,17 @@ tempdir_remove <- function(dir = tempdir(),
 
 #' Title
 #'
-#' @param dir 
-#' @param objects 
-#' @param exclude 
-#' @param silent 
+#' @param dir folder or folders to read
+#' @param objects names of the top-level objects to read
+#' @param exclude pattern of entries to return as a path instead of reading
+#' @param assign assign the objects into the global environment
+#' @param silent Should messages be suppressed?
 #'
-#' @returns
+#' @returns the list of read objects (invisibly)
 #' @export
 #'
 #' @examples
-load_objects <- function(dir = "", 
+load_objects <- function(dir = "",
                          objects = c("Analysis", 
                                      "Datasets", 
                                      "Info"), 

@@ -1,18 +1,40 @@
 Package: msArrow
-Title: Wrapper for arrow functions to handle large (proteomics) data 
+Title: Wrapper for Arrow Functions to Handle Large (Proteomics) Data
 Version: 0.0.0.9000
-Authors@R: 
+Authors@R:
     person("Nico", "Hüttmann", , "huttmann.nico@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9321-2675"))
-Description: This package contains arrow functions to handle proteomics data 
-License: MIT
+Description: Convenient wrappers around some 'arrow' and 'nanoparquet'
+    functions for handling large mass spectrometry data, plus an
+    opinionated way to organise datasets. Data are kept on disk as parquet
+    or delimited files and referenced by path rather than held in memory.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-Suggests: 
-    arrow, 
-    nanoparquet, 
-    vroom
-VignetteBuilder: knitr
-Imports:
-    tidyverse
 RoxygenNote: 7.3.3
+URL: https://github.com/nicohuttmann/msArrow,
+    https://nicohuttmann.github.io/msArrow/
+BugReports: https://github.com/nicohuttmann/msArrow/issues
+Imports:
+    arrow,
+    dplyr,
+    magrittr,
+    methods,
+    nanoparquet,
+    purrr,
+    rlang,
+    scales,
+    stats,
+    stringr,
+    tibble,
+    tidyr,
+    tools,
+    utils
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    vroom,
+    withr
+VignetteBuilder: knitr
+Config/testthat/edition: 3

@@ -2,8 +2,9 @@
 #'
 #' @param observations vector of observations
 #' @param dataset dataset
+#' @param ... additional arguments
 #'
-#' @return
+#' @returns a vector of observation identifiers
 #' @export
 #'
 #' @importFrom magrittr %>%
@@ -185,10 +186,11 @@ get_observations_data <- function(which,
 #' Add observations data to data frame
 #'
 #' @param data data frame
-#' @param which observations data
+#' @param which observations data columns to add
+#' @param by column of the observations data to join on (default "observations")
 #' @param dataset dataset
 #'
-#' @return
+#' @returns the data frame with the requested observations data columns added
 #' @export
 #'
 #' @importFrom magrittr %>%
@@ -232,11 +234,11 @@ add_observations_data <- function(data,
   # Add column/s
   if ("variables" %in% names(data)) {
     data <- dplyr::left_join(data, observations_data, by = by) %>% 
-      dplyr::relocate(!!which, .after = c(by, "variables")) %>% 
+      dplyr::relocate(!!which, .after = dplyr::all_of(c(by, "variables"))) %>%
       dplyr::compute()
   } else {
     data <- dplyr::left_join(data, observations_data, by = by) %>% 
-      dplyr::relocate(!!which, .after = by) %>% 
+      dplyr::relocate(!!which, .after = dplyr::all_of(by)) %>%
       dplyr::compute()
   }
   
@@ -246,18 +248,18 @@ add_observations_data <- function(data,
 }
 
 
-#' Title
+#' Writes the observations data of a dataset to disk
 #'
-#' @param observations_data_frame 
-#' @param observations_data_frame_preview 
-#' @param name 
-#' @param tag 
-#' @param dataset 
-#' @param n_preview 
-#' @param save_dir 
-#' @param silent 
+#' @param observations_data_frame observations data to save
+#' @param observations_data_frame_preview frame stored as the preview
+#' @param name name the frame is stored under
+#' @param tag suffix appended to the file name
+#' @param dataset dataset name
+#' @param n_preview number of rows kept in the preview
+#' @param save_dir folder the dataset store lives in
+#' @param silent Should messages be suppressed?
 #'
-#' @returns
+#' @returns a list with the stored preview and the file location (invisibly)
 #' @export
 #'
 #' @examples
@@ -304,17 +306,17 @@ add_observations_data <- function(data,
 }
 
 
-#' Title
+#' Adds or updates observations data in a dataset
 #'
-#' @param data observations data as tibble or Arrow object 
-#' @param columns 
-#' @param name 
-#' @param tag 
-#' @param dataset dataset 
-#' @param n_preview 
-#' @param save_dir 
+#' @param data observations data as tibble or Arrow object
+#' @param columns columns of <data> to store (default: all but "observations")
+#' @param name name the frame is stored under
+#' @param tag suffix appended to the file name
+#' @param dataset dataset name
+#' @param n_preview number of rows kept in the preview
+#' @param save_dir folder the dataset store lives in
 #'
-#' @returns
+#' @returns a list with the stored preview and the file location (invisibly)
 #' @export
 #'
 #' @examples

@@ -159,10 +159,11 @@ get_variables_data <- function(which,
 #' Add variables data to data frame
 #'
 #' @param data data frame
-#' @param which variables data
+#' @param which variables data columns to add
+#' @param by column of the variables data to join on (default "variables")
 #' @param dataset dataset
 #'
-#' @return
+#' @returns the data frame with the requested variables data columns added
 #' @export
 #'
 #' @importFrom magrittr %>%
@@ -206,11 +207,11 @@ add_variables_data <- function(data,
   # Add column/s
   if ("observations" %in% names(data)) {
     data <- dplyr::left_join(data, variables_data, by = by) %>% 
-      dplyr::relocate(!!which, .after = c("observations", by)) %>% 
+      dplyr::relocate(!!which, .after = dplyr::all_of(c("observations", by))) %>%
       dplyr::compute()
   } else {
     data <- dplyr::left_join(data, variables_data, by = by) %>% 
-      dplyr::relocate(!!which, .after = by) %>% 
+      dplyr::relocate(!!which, .after = dplyr::all_of(by)) %>%
       dplyr::compute()
   }
   
@@ -220,17 +221,17 @@ add_variables_data <- function(data,
 }
 
 
-#' Title
+#' Writes the variables data of a dataset to disk
 #'
-#' @param variables_data_frame 
-#' @param variables_data_frame_preview 
-#' @param dataset 
-#' @param name 
-#' @param tag 
-#' @param n_preview 
-#' @param save_dir 
+#' @param variables_data_frame variables data to save
+#' @param variables_data_frame_preview frame stored as the preview
+#' @param dataset dataset name
+#' @param name name the frame is stored under
+#' @param tag suffix appended to the file name
+#' @param n_preview number of rows kept in the preview
+#' @param save_dir folder the dataset store lives in
 #'
-#' @returns
+#' @returns a list with the stored preview and the file location (invisibly)
 #' @export
 #'
 #' @examples
@@ -277,17 +278,17 @@ add_variables_data <- function(data,
 }
 
 
-#' Title
+#' Adds or updates variables data in a dataset
 #'
-#' @param data variables data as tibble or Arrow object 
-#' @param columns 
-#' @param name 
-#' @param tag 
-#' @param dataset 
-#' @param n_preview 
-#' @param save_dir 
+#' @param data variables data as tibble or Arrow object
+#' @param columns columns of <data> to store (default: all but "variables")
+#' @param name name the frame is stored under
+#' @param tag suffix appended to the file name
+#' @param dataset dataset name
+#' @param n_preview number of rows kept in the preview
+#' @param save_dir folder the dataset store lives in
 #'
-#' @returns
+#' @returns a list with the stored preview and the file location (invisibly)
 #' @export
 #'
 #' @examples

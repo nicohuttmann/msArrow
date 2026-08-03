@@ -68,13 +68,13 @@ get_dataset_names <- function() {
   
 }
 
-#' Title
+#' Registers a new dataset and creates its folder layout
 #'
-#' @param name 
-#' @param save_dir 
-#' @param replace 
+#' @param name name of the dataset
+#' @param save_dir folder the dataset store is created in (default: tempdir())
+#' @param replace replace an existing entry of the same name without warning
 #'
-#' @returns
+#' @returns TRUE (invisibly)
 #' @export
 #'
 #' @examples

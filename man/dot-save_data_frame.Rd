@@ -17,23 +17,26 @@
 )
 }
 \arguments{
-\item{data_frame}{}
+\item{data_frame}{long observations x variables frame to save}
 
-\item{data_frame_preview}{}
+\item{data_frame_preview}{frame stored as the preview (default: first rows)}
 
-\item{dataset}{}
+\item{dataset}{dataset name}
 
-\item{name}{}
+\item{name}{name the frame is stored under}
 
-\item{tag}{}
+\item{tag}{suffix appended to the file name}
 
-\item{n_preview}{}
+\item{n_preview}{number of rows kept in the preview}
 
-\item{save_dir}{}
+\item{save_dir}{folder the dataset store lives in}
 
-\item{partitioning}{}
+\item{partitioning}{columns to partition the parquet dataset by}
 
-\item{silent}{}
+\item{silent}{Should messages be suppressed?}
+}
+\value{
+a list with the stored preview and the file location (invisibly)
 }
 \description{
 Title

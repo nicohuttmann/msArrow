@@ -2,17 +2,20 @@
 % Please edit documentation in R/00a_datasets.R
 \name{.add_dataset}
 \alias{.add_dataset}
-\title{Title}
+\title{Registers a new dataset and creates its folder layout}
 \usage{
 .add_dataset(name, save_dir, replace = F)
 }
 \arguments{
-\item{name}{}
+\item{name}{name of the dataset}
 
-\item{save_dir}{}
+\item{save_dir}{folder the dataset store is created in (default: tempdir())}
 
-\item{replace}{}
+\item{replace}{replace an existing entry of the same name without warning}
+}
+\value{
+TRUE (invisibly)
 }
 \description{
-Title
+Registers a new dataset and creates its folder layout
 }

@@ -7,9 +7,12 @@
 .get_defaults(type, name)
 }
 \arguments{
-\item{type}{}
+\item{type}{default set to return ("variables_data" or "data_frames")}
 
-\item{name}{}
+\item{name}{name of a single default within \if{html}{\out{<type>}}}
+}
+\value{
+the requested defaults, or the whole list if \if{html}{\out{<type>}} is missing
 }
 \description{
 Title

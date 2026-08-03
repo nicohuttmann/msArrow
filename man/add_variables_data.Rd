@@ -9,9 +9,14 @@ add_variables_data(data, which, by = "variables", dataset)
 \arguments{
 \item{data}{data frame}
 
-\item{which}{variables data}
+\item{which}{variables data columns to add}
+
+\item{by}{column of the variables data to join on (default "variables")}
 
 \item{dataset}{dataset}
+}
+\value{
+the data frame with the requested variables data columns added
 }
 \description{
 Add variables data to data frame

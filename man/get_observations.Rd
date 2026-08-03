@@ -10,6 +10,11 @@ get_observations(observations, dataset, ...)
 \item{observations}{vector of observations}
 
 \item{dataset}{dataset}
+
+\item{...}{additional arguments}
+}
+\value{
+a vector of observation identifiers
 }
 \description{
 Return observations

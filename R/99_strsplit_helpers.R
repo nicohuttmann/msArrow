@@ -3,7 +3,7 @@
 #' @param x string
 #' @param split split character
 #' @param vector.output output type (T = vector; F = list)
-#' @param as.numeric try to convert to numeric
+#' @param as_numeric try to convert to numeric
 #'
 #' @return
 #' @export

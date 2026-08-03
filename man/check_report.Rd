@@ -2,13 +2,16 @@
 % Please edit documentation in R/import_diann.R
 \name{check_report}
 \alias{check_report}
-\title{Title}
+\title{Summarises a DIA-NN report without importing it}
 \usage{
 check_report(file)
 }
 \arguments{
-\item{file}{}
+\item{file}{path to a DIA-NN report (parquet or tsv)}
+}
+\value{
+a list of summary statistics, including the file schema (invisibly)
 }
 \description{
-Title
+Summarises a DIA-NN report without importing it
 }

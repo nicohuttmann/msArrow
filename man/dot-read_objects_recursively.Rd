@@ -14,13 +14,20 @@
 )
 }
 \arguments{
-\item{name}{}
+\item{name}{name of the folder or file to read}
 
-\item{dir}{}
+\item{dir}{folder the object lives in}
 
-\item{exclude}{}
+\item{exclude}{pattern of entries to return as a path instead of reading}
 
-\item{silent}{}
+\item{silent}{Should messages be suppressed?}
+
+\item{as_arrow_table}{return tibbles or Arrow connections}
+
+\item{...}{additional arguments for the reading function}
+}
+\value{
+the nested list rebuilt from the folder tree
 }
 \description{
 Title

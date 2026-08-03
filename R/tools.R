@@ -63,12 +63,12 @@ fus <- function (x, decreasing = F) {
 
 #' Vector with elements as names
 #'
-#' @param ... 
+#' @param ... vector/s whose elements become their own names
 #'
-#' @return
+#' @returns a character vector named by its own elements
 #' @export
 #'
-#' 
+#'
 cc <- function(...) {
   setNames(c(...), c(...))
 }

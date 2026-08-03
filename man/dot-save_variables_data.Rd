@@ -2,7 +2,7 @@
 % Please edit documentation in R/00b_variables.R
 \name{.save_variables_data}
 \alias{.save_variables_data}
-\title{Title}
+\title{Writes the variables data of a dataset to disk}
 \usage{
 .save_variables_data(
   variables_data_frame,
@@ -15,20 +15,23 @@
 )
 }
 \arguments{
-\item{variables_data_frame}{}
+\item{variables_data_frame}{variables data to save}
 
-\item{variables_data_frame_preview}{}
+\item{variables_data_frame_preview}{frame stored as the preview}
 
-\item{dataset}{}
+\item{dataset}{dataset name}
 
-\item{name}{}
+\item{name}{name the frame is stored under}
 
-\item{tag}{}
+\item{tag}{suffix appended to the file name}
 
-\item{n_preview}{}
+\item{n_preview}{number of rows kept in the preview}
 
-\item{save_dir}{}
+\item{save_dir}{folder the dataset store lives in}
+}
+\value{
+a list with the stored preview and the file location (invisibly)
 }
 \description{
-Title
+Writes the variables data of a dataset to disk
 }

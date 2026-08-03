@@ -132,11 +132,10 @@ get_data_frame <- function(which,
 #' @param which specific name of data type
 #' @param variables selected variables
 #' @param observations selected observations
-#' @param dataset dataset name 
-#' @param output.type data type (default = "tibble", "data.frame", "matrix")
-#' @param ... additional arguments for open_data() 
+#' @param dataset dataset name
+#' @param ... additional arguments for open_data()
 #'
-#' @return
+#' @returns a lazy Arrow connection to the assembled data frame
 #' @export
 #'
 #'
@@ -198,17 +197,17 @@ open_data_frame <- function(which,
 
 #' Title
 #'
-#' @param data_frame 
-#' @param data_frame_preview 
-#' @param dataset 
-#' @param name 
-#' @param tag 
-#' @param n_preview 
-#' @param save_dir 
-#' @param partitioning 
-#' @param silent 
+#' @param data_frame long observations x variables frame to save
+#' @param data_frame_preview frame stored as the preview (default: first rows)
+#' @param dataset dataset name
+#' @param name name the frame is stored under
+#' @param tag suffix appended to the file name
+#' @param n_preview number of rows kept in the preview
+#' @param save_dir folder the dataset store lives in
+#' @param partitioning columns to partition the parquet dataset by
+#' @param silent Should messages be suppressed?
 #'
-#' @returns
+#' @returns a list with the stored preview and the file location (invisibly)
 #' @export
 #'
 #' @examples
@@ -257,17 +256,17 @@ open_data_frame <- function(which,
 }
 
 
-#' Title
+#' Saves a data frame into a dataset store
 #'
-#' @param data 
-#' @param dataset 
-#' @param name 
-#' @param tag 
-#' @param n_preview 
-#' @param save_dir 
-#' @param partitioning 
+#' @param data long observations x variables frame to save
+#' @param dataset dataset name
+#' @param name name the frame is stored under
+#' @param tag suffix appended to the file name
+#' @param n_preview number of rows kept in the preview
+#' @param save_dir folder the dataset store lives in
+#' @param partitioning columns to partition the parquet dataset by
 #'
-#' @returns
+#' @returns a list with the stored preview and the file location (invisibly)
 #' @export
 #'
 #' @examples

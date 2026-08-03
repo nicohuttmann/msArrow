@@ -13,13 +13,18 @@ load_objects(
 )
 }
 \arguments{
-\item{dir}{}
+\item{dir}{folder or folders to read}
 
-\item{objects}{}
+\item{objects}{names of the top-level objects to read}
 
-\item{exclude}{}
+\item{exclude}{pattern of entries to return as a path instead of reading}
 
-\item{silent}{}
+\item{assign}{assign the objects into the global environment}
+
+\item{silent}{Should messages be suppressed?}
+}
+\value{
+the list of read objects (invisibly)
 }
 \description{
 Title
