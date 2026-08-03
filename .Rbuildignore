@@ -1,5 +1,9 @@
 ^package\.Rproj$
+^msArrow\.Rproj$
 ^\.Rproj\.user$
 dev/
 ^\.positai$
 ^\.claude$
+^Data$
+^\.Rhistory$
+^\.github$

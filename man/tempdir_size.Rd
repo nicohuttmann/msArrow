@@ -7,7 +7,7 @@
 tempdir_size(
   dir = tempdir(),
   all.paths = F,
-  pattern = ".Rds|.parquet",
+  pattern = ".Rds|.parquet|.tsv|.csv|.txt",
   units = "auto_si"
 )
 }

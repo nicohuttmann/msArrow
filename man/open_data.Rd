@@ -15,7 +15,23 @@ useful if file is an R object and fallback is a hardcoded string}
 \item{recursive}{Should data be recursively loaded?}
 
 \item{credit}{how many recursive steps are allowed}
+
+\item{...}{additional arguments for the opening function}
+}
+\value{
+an Arrow dataset connection, or the object itself if \if{html}{\out{<file>}} is not
+a file path
 }
 \description{
 Loads data from a file name
+}
+\examples{
+  data_small <- tibble::tibble(a = 1:3, b = letters[1:3]) \%>\%
+    write_data(file = "data_small", 
+               dir = tempdir(), 
+               type = "tsv")
+
+  open_data(data_small) \%>\%
+    dplyr::filter(a > 1) \%>\%
+    dplyr::collect()
 }

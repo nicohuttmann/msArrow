@@ -1,31 +1,208 @@
-#' Writes data to a file or temporary file  
+.types_allowed <- c("parquet", "rds", "tsv", "csv", "txt")
+
+
+#' Checks file types given to write_data()
 #'
-#' `write_data()` decides whether to save the file in the .parquet format if 
+#' @param type one or several file types
+#'
+#' @returns lowercase vector of unique, valid file types
+#' @keywords internal
+.check_data_type <- function(type) {
+  
+  type <- unique(tolower(as.character(type)))
+  
+  if (length(type) == 0)
+    stop("Please provide at least one file <type>.", call. = F)
+  
+  if (any(!type %in% .types_allowed))
+    stop(paste0('Unknown file <type> "', 
+                paste(setdiff(type, .types_allowed), collapse = '", "'), 
+                '". Use one or several of "', 
+                paste(.types_allowed, collapse = '", "'), 
+                '".'), 
+         call. = F)
+  
+  return(type)
+  
+}
+
+
+#' Delimiter used for a delimited file type
+#'
+#' @param type file type ("tsv", "csv" or "txt")
+#'
+#' @returns single character delimiter (NA for non-delimited types)
+#' @keywords internal
+.data_type_delim <- function(type) {
+  unname(c(parquet = NA, 
+           rds = NA, 
+           tsv = "\t", 
+           csv = ",", 
+           txt = "\t")[type])
+}
+
+
+#' Removes a known file type ending from a file path
+#'
+#' @param file_dir file path
+#'
+#' @returns file path without a trailing known file type ending
+#' @keywords internal
+.trim_data_type <- function(file_dir) {
+  ifelse(tolower(tools::file_ext(file_dir)) %in% .types_allowed, 
+         tools::file_path_sans_ext(file_dir), 
+         file_dir)
+}
+
+
+#' Builds the file paths for one or several file types
+#'
+#' @param file_dir file path without or with file type ending
+#' @param type one or several file types
+#'
+#' @returns file paths, one per given type
+#' @keywords internal
+.add_data_type <- function(file_dir, type) {
+  paste0(.trim_data_type(file_dir), 
+         ".", 
+         ifelse(type == "rds", "Rds", type))
+}
+
+
+#' Writes a single file of a given file type
+#'
+#' @param x data to be saved
+#' @param file_dir final file path including the file type ending
+#' @param type file type to write
+#' @param silent Should messages be suppressed?
+#' @param partitioning partitioning columns (parquet only)
+#' @param ... additional arguments for the saving function
+#'
+#' @returns file path of the written file (invisibly)
+#' @keywords internal
+.write_data_file <- function(x, 
+                             file_dir, 
+                             type, 
+                             silent = F, 
+                             partitioning = NULL, 
+                             ...) {
+  
+  if (!silent) {
+    if (!file.exists(file_dir)) {
+      cat(paste0('Saving file "', 
+                 file_dir, 
+                 '".'))
+    } else {
+      cat(paste0('Overwriting file "', 
+                 file_dir, 
+                 '".'))
+    }
+  }
+  
+  # parquet file or partitioned dataset
+  if (type == "parquet") {
+    
+    if (is.null(partitioning))
+      arrow::write_parquet(x = x, 
+                           sink = file_dir, 
+                           ...)
+    
+    else
+      arrow::write_dataset(dataset = x, 
+                           path = file_dir, 
+                           partitioning = partitioning, 
+                           existing_data_behavior = "delete_matching", 
+                           ...)
+    
+    # delimited file
+  } else if (type %in% c("tsv", "csv", "txt")) {
+    
+    write_options <- arrow::CsvWriteOptions$create(include_header = T, 
+                                                   delimiter = .data_type_delim(type))
+    
+    written <- tryCatch(arrow::write_csv_arrow(x = x, 
+                                               sink = file_dir, 
+                                               write_options = write_options, 
+                                               ...), 
+                        error = function(e) e)
+    
+    if (inherits(written, "error"))
+      stop(paste0('Data cannot be written as a .', 
+                  type, 
+                  ' file: ', 
+                  conditionMessage(written), 
+                  '\n  Delimited files store flat tables only - use ', 
+                  'type = "parquet" or type = "rds" for these data.'), 
+           call. = F)
+    
+    if (!is.null(partitioning) && !silent)
+      cat(paste0(" <partitioning> ignored for .", type, " files."))
+    
+    # Rds file
+  } else {
+    
+    saveRDS(x, file_dir, ...)
+    
+  }
+  
+  if (!silent) cat(" Done!\n")
+  
+  return(invisible(file_dir))
+  
+}
+
+
+#' Writes data to one or several files
+#'
+#' `write_data()` decides whether to save the file in the .parquet format if
 #' possible or as an .Rds file and returns the final file path. If no file 
 #' name is given, a temporary file will be saved. Depending on the file and 
 #' arguments `arrow::write_parquet()`, `arrow::write_dataset()` or R's native 
-#' `saveRDS()` will be used. If redo = F, the function checks if the computation can be skipped. 
+#' `saveRDS()` will be used. If redo = F, the function checks if the computation can be skipped.
 #'
-#' @param x data to be saved 
+#' Giving one or several file types via <type> overrides this automatic choice.
+#' Tables can be written as "parquet", "rds", "tsv", "csv" or "txt"; delimited
+#' files are written with `arrow::write_csv_arrow()` and ".txt" is
+#' tab-separated. When several types are given, all files are written but only
+#' the path of the first type is returned, so
+#' `write_data(x, "data_main", "Data", type = c("parquet", "tsv"))` keeps the
+#' pipeline on the parquet file and drops a readable .tsv next to it.
+#'
+#' @param x data to be saved
 #' @param file file name (temporary file if not given; file ending will be 
 #' determined automatically)
-#' @param dir (optional) folder name if easier to specify separate from file 
-#' name 
-#' @param redo Should the computation be skipped, if file of given name already 
-#' exists? File name will still be returned. 
-#' @param clean_memory Should the memory be cleaned with gc()/cleanMem() afer 
-#' writing 
-#' @param silent Should messages be suppressed? 
-#' @param partitioning Should the parquet file be split into  
-#' @param ... additional arguments for the saving function 
-#' @returns
+#' @param dir (optional) folder name if easier to specify separate from file
+#' name
+#' @param type (optional) one or several file types to write ("parquet", "rds", 
+#' "tsv", "csv" or "txt"); the path of the first type is returned
+#' @param redo Should the computation be skipped, if file of given name already
+#' exists? File name will still be returned.
+#' @param return_path Should the saved file path be return or the file itself?
+#' @param list_as_folders Should a list be saved as a folder of single files
+#' instead of one .Rds file?
+#' @param clean_memory Should the memory be cleaned with gc()/cleanMem() after
+#' writing
+#' @param silent Should messages be suppressed?
+#' @param partitioning Should the parquet file be split into (parquet only)
+#' @param ... additional arguments for the saving function; passed on to every
+#' given <type>, so format-specific arguments only work with a single type
+#' @returns file path of the written file, or the path of the first given
+#' <type> if several types were written
 #' @export
 #'
 #' @examples
+#'   data_small <- tibble::tibble(a = 1:3, b = letters[1:3]) %>%
+#'     write_data(file = "data_small", 
+#'                dir = tempdir(), 
+#'                type = c("parquet", "tsv"))
+#'
+#'   get_data(data_small)
 write_data <- function(x, 
                        file, 
                        dir, 
+                       type, 
                        redo = T, 
+                       return_path = T, 
                        list_as_folders = T, 
                        clean_memory = F, 
                        silent = F, 
@@ -40,19 +217,30 @@ write_data <- function(x,
     stop("Please provide the data <x> and a <file> name when specifying a directory <dir>.")
   }
   
-  # Get final file path 
+  # Get final file path
   if (hasArg(dir)) file_dir <- file.path(dir, file)
   else file_dir <- file
+  
+  # Check given file types
+  if (hasArg(type)) type <- .check_data_type(type)
+  else type <- NULL
   
   
   # Check if x should be run or simply save the location
   if (!redo) {
     
-    files_found <- purrr::map_lgl(paste0(file_dir, c(".parquet", ".Rds")) %>% 
+    if (is.null(type)) files_expected <- paste0(.trim_data_type(file_dir), 
+                                                c(".parquet", ".Rds"))
+    else files_expected <- .add_data_type(file_dir, type)
+    
+    files_found <- purrr::map_lgl(files_expected %>%
                                     setNames(., .), 
                                   file.exists)
     
-    if (any(files_found)) {
+    # every given type must exist before the computation is skipped
+    skip <- if (is.null(type)) any(files_found) else all(files_found)
+    
+    if (skip) {
       
       file_return <- names(which(files_found))[1]
       
@@ -74,83 +262,105 @@ write_data <- function(x,
   if (!dir.exists(dirname(file_dir))) 
     dir.create(dirname(file_dir), recursive = T)
   
-  # Save as parquet file or dataset 
-  if (((tibble::is_tibble(x) ||
-        is.data.frame(x) ||
-        is.matrix(x)) && 
-       length(tryCatch(arrow::infer_type(x), error = function(e) NULL)) > 0) || 
-      any(stringr::str_detect(class(x), "(A|a)rrow"))) {
-    
-    if (!stringr::str_detect(tolower(file_dir), "\\.parquet$")) 
-      file_dir <- paste0(file_dir, ".parquet")
-    
-    
-    if (!silent) {
-      if (!file.exists(file_dir)) {
-        cat(paste0('Saving file "', 
-                   file_dir, 
-                   '".'))
-      } else {
-        cat(paste0('Overwriting file "', 
-                   file_dir, 
-                   '".'))
-      }
-    }
-    
-    if (is.null(partitioning)) 
-      arrow::write_parquet(x = x, 
-                           sink = file_dir, 
-                           ...)
-    
-    else 
-      arrow::write_dataset(dataset = x, 
-                           path = file_dir, 
-                           partitioning = partitioning, 
-                           existing_data_behavior = "delete_matching", 
-                           ...)
+  # Write every given file type
+  if (!is.null(type)) {
     
     # Save list as parquetlist
-  } else if (class(x)[1] == "list" && list_as_folders) { 
-    
-    .save_objects_recursively(object = x, 
-                              name = paste0(file, ".parquetlist"), 
-                              dir = dir, 
-                              silent = silent, 
-                              redo = redo, 
-                              list_as_folders = list_as_folders, 
-                              clean_memory = clean_memory, 
-                              partitioning = partitioning, 
-                              ...) 
-    
-    file_dir <- paste0(file_dir, ".parquetlist")
-    
-    # Save list as Rds file 
-  } else {
-    
-    if (!stringr::str_detect(tolower(file_dir), "\\.rds$")) 
-      file_dir <- paste0(file_dir, ".Rds")
-    
-    if (!silent) {
-      if (!file.exists(file_dir)) {
-        cat(paste0('Saving file "', 
-                   file_dir, 
-                   '".'))
-      } else {
-        cat(paste0('Overwriting file "', 
-                   file_dir, 
-                   '".'))
-      }
+    if (class(x)[1] == "list" && list_as_folders) {
+      
+      if (length(type) > 1)
+        stop(paste0('Only one <type> can be given for a list, as the files ', 
+                    'inside a .parquetlist folder would share one name.'), 
+             call. = F)
+      
+      .save_objects_recursively(object = x, 
+                                name = paste0(file, ".parquetlist"), 
+                                dir = dir, 
+                                type = type, 
+                                silent = silent, 
+                                redo = redo, 
+                                list_as_folders = list_as_folders, 
+                                clean_memory = clean_memory, 
+                                partitioning = partitioning, 
+                                ...)
+      
+      file_dir <- paste0(file_dir, ".parquetlist")
+      
+      # Save table as every given file type
+    } else {
+      
+      files_written <- .add_data_type(file_dir, type)
+      
+      for (i in seq_along(type))
+        .write_data_file(x = x, 
+                         file_dir = files_written[i], 
+                         type = type[i], 
+                         silent = silent, 
+                         partitioning = partitioning, 
+                         ...)
+      
+      # only the first given type is returned
+      file_dir <- files_written[1]
+      
     }
     
-    saveRDS(x, file_dir, ...)
+    # Choose the file type automatically
+  } else {
+    
+    # Save as parquet file or dataset
+    if (((tibble::is_tibble(x) ||
+          is.data.frame(x) ||
+          is.matrix(x)) &&
+         length(tryCatch(arrow::infer_type(x), error = function(e) NULL)) > 0) ||
+        any(stringr::str_detect(class(x), "(A|a)rrow"))) {
+      
+      if (!stringr::str_detect(tolower(file_dir), "\\.parquet$"))
+        file_dir <- paste0(file_dir, ".parquet")
+      
+      .write_data_file(x = x, 
+                       file_dir = file_dir, 
+                       type = "parquet", 
+                       silent = silent, 
+                       partitioning = partitioning, 
+                       ...)
+      
+      # Save list as parquetlist
+    } else if (class(x)[1] == "list" && list_as_folders) {
+      
+      .save_objects_recursively(object = x, 
+                                name = paste0(file, ".parquetlist"), 
+                                dir = dir, 
+                                silent = silent, 
+                                redo = redo, 
+                                list_as_folders = list_as_folders, 
+                                clean_memory = clean_memory, 
+                                partitioning = partitioning, 
+                                ...)
+      
+      file_dir <- paste0(file_dir, ".parquetlist")
+      
+      # Save as Rds file
+    } else {
+      
+      if (!stringr::str_detect(tolower(file_dir), "\\.rds$"))
+        file_dir <- paste0(file_dir, ".Rds")
+      
+      .write_data_file(x = x, 
+                       file_dir = file_dir, 
+                       type = "rds", 
+                       silent = silent, 
+                       ...)
+      
+    }
     
   }
   
-  if (!silent) cat(" Done!\n")
-  
   if (!isFALSE(clean_memory)) cleanMem(clean_memory)
   
-  return(file_dir)
+  if (return_path)
+    return(file_dir)
+  else 
+    return(x)
   
 }
 
@@ -163,12 +373,19 @@ write_data <- function(x,
 #' @param recursive Should data be recursively loaded?
 #' @param credit how many recursive steps are allowed 
 #' @param as_arrow_table return a tibble or an Arrow connection 
-#' @param ... additional arguments 
+#' @param ... additional arguments
 #'
-#' @returns
+#' @returns a tibble, or an Arrow dataset connection if as_arrow_table = T; the
+#' object itself if <file> is not a file path
 #' @export
 #'
 #' @examples
+#'   data_small <- tibble::tibble(a = 1:3, b = letters[1:3]) %>%
+#'     write_data(file = "data_small", 
+#'                dir = tempdir(), 
+#'                type = "tsv")
+#'
+#'   get_data(data_small)
 get_data <- function(file, 
                      fallback, 
                      recursive = T, 
@@ -218,14 +435,28 @@ get_data <- function(file,
         
       } else {
         
-        # data_object <- arrow::read_parquet(file, as_data_frame = F)
         data_object <- arrow::open_dataset(file, ...)
         
       }
       
+    } else if (tolower(tools::file_ext(file)) %in% c("tsv", "csv", "txt")) {
+      
+      delim <- .data_type_delim(tolower(tools::file_ext(file)))
+      
+      if (!as_arrow_table)
+        data_object <- arrow::read_delim_arrow(file = file, 
+                                               delim = delim, 
+                                               ...) %>%
+          tibble::as_tibble()
+      
+      else
+        data_object <- arrow::open_delim_dataset(sources = file, 
+                                                 delim = delim, 
+                                                 ...)
+      
     } else if (tolower(tools::file_ext(file)) == "rds") {
       
-      if (recursive) data_object <- readRDS(file) %>% 
+      if (recursive) data_object <- readRDS(file) %>%
           get_data(recursive = credit - 1 > 0, 
                    credit = credit - 1, 
                    as_arrow_table = as_arrow_table)
@@ -252,12 +483,22 @@ get_data <- function(file,
 #' @param fallback other file name or alternative way to provide the input - 
 #' useful if file is an R object and fallback is a hardcoded string 
 #' @param recursive Should data be recursively loaded?
-#' @param credit how many recursive steps are allowed 
+#' @param credit how many recursive steps are allowed
+#' @param ... additional arguments for the opening function
 #'
-#' @returns
+#' @returns an Arrow dataset connection, or the object itself if <file> is not
+#' a file path
 #' @export
 #'
 #' @examples
+#'   data_small <- tibble::tibble(a = 1:3, b = letters[1:3]) %>%
+#'     write_data(file = "data_small", 
+#'                dir = tempdir(), 
+#'                type = "tsv")
+#'
+#'   open_data(data_small) %>%
+#'     dplyr::filter(a > 1) %>%
+#'     dplyr::collect()
 open_data <- function(file, 
                       fallback, 
                       recursive = T, 
@@ -289,7 +530,7 @@ open_data <- function(file,
       
     }  else if (tolower(tools::file_ext(file)) == "rds") {
       
-      if (recursive) data_object <- readRDS(file) %>% 
+      if (recursive) data_object <- readRDS(file) %>%
           open_data(recursive = credit - 1 > 0, 
                     credit = credit - 1, 
                     ...)
@@ -297,11 +538,18 @@ open_data <- function(file,
       else data_object <- readRDS(file)
       
       
+    } else if (tolower(tools::file_ext(file)) %in% c("tsv", "csv", "txt")) {
+      
+      data_object <-
+        arrow::open_delim_dataset(sources = file, 
+                                  delim = .data_type_delim(tolower(tools::file_ext(file))), 
+                                  ...)
+      
     } else {
       
       data_object <- arrow::open_dataset(file, ...)
       
-    } 
+    }
     
   }
   
@@ -342,7 +590,7 @@ get_data_m <- function(file, recursive = T, credit = 0, .id = NULL) {
 #'   tempdir_list()
 tempdir_list <- function(dir = tempdir(), 
                          all.paths = F, 
-                         pattern = ".Rds|.parquet|.pdf") {
+                         pattern = ".Rds|.parquet|.tsv|.csv|.txt|.pdf") {
   if (all.paths) dir <- dirname(dir)
   list.files(path = dir, pattern = pattern, full.names = T)
 }
@@ -362,7 +610,7 @@ tempdir_list <- function(dir = tempdir(),
 #'   tempdir_list()
 tempdir_size <- function(dir = tempdir(), 
                          all.paths = F, 
-                         pattern = ".Rds|.parquet", 
+                         pattern = ".Rds|.parquet|.tsv|.csv|.txt", 
                          units = "auto_si") {
   if (all.paths) dir <- dirname(dir)
   scales::label_bytes(units = "auto_si")(file.size(list.files(path = dir, 
@@ -384,31 +632,34 @@ tempdir_size <- function(dir = tempdir(),
 #'   tempdir_remove()
 tempdir_remove <- function(dir = tempdir(), 
                            all.paths = F, 
-                           pattern = ".Rds|.parquet|.pdf") {
+                           pattern = ".Rds|.parquet|.tsv|.csv|.txt|.pdf") {
   if (all.paths) dir <- dirname(dir)
   file.remove(list.files(path = dir, pattern = pattern, full.names = T))
 }
 
 
-#' Title
+#' Saves a nested list as a folder of single files
 #'
-#' @param object 
-#' @param name 
-#' @param dir 
-#' @param silent 
-#' @param redo 
-#' @param list_as_folders 
-#' @param clean_memory 
-#' @param partitioning 
-#' @param ... 
+#' @param object list or single object to be saved
+#' @param name name of the folder or file
+#' @param dir folder the object is saved in
+#' @param type (optional) file type used for every table in the list
+#' @param silent Should messages be suppressed?
+#' @param redo Should existing files be written again?
+#' @param list_as_folders Should nested lists become nested folders?
+#' @param clean_memory Should the memory be cleaned with gc()/cleanMem() afer
+#' writing
+#' @param partitioning Should the parquet files be split into
+#' @param ... additional arguments for the saving function
 #'
-#' @returns
+#' @returns TRUE (invisibly)
 #' @export
 #'
 #' @examples
 .save_objects_recursively <- function(object, 
                                       name, 
                                       dir, 
+                                      type = NULL, 
                                       silent = F, 
                                       redo = T, 
                                       list_as_folders = T, 
@@ -426,6 +677,7 @@ tempdir_remove <- function(dir = tempdir(),
       .save_objects_recursively(object = object[[j]], 
                                 name = j, 
                                 dir = file.path(dir, name), 
+                                type = type, 
                                 list_as_folders = list_as_folders, 
                                 clean_memory = clean_memory, 
                                 silent = silent, 
@@ -434,15 +686,29 @@ tempdir_remove <- function(dir = tempdir(),
     }
   } else {
     
-    write_data(x = object, 
-               file = name, 
-               dir = dir, 
-               redo = redo, 
-               list_as_folders = list_as_folders, 
-               clean_memory = clean_memory, 
-               silent = silent, 
-               partitioning = partitioning, 
-               ...)
+    # <type> has no default in write_data() and is only passed on if given
+    if (is.null(type))
+      write_data(x = object, 
+                 file = name, 
+                 dir = dir, 
+                 redo = redo, 
+                 list_as_folders = list_as_folders, 
+                 clean_memory = clean_memory, 
+                 silent = silent, 
+                 partitioning = partitioning, 
+                 ...)
+    
+    else
+      write_data(x = object, 
+                 file = name, 
+                 dir = dir, 
+                 type = type, 
+                 redo = redo, 
+                 list_as_folders = list_as_folders, 
+                 clean_memory = clean_memory, 
+                 silent = silent, 
+                 partitioning = partitioning, 
+                 ...)
     
   }
   return(invisible(T))

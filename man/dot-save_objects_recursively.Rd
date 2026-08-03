@@ -2,12 +2,13 @@
 % Please edit documentation in R/get_write_data.R
 \name{.save_objects_recursively}
 \alias{.save_objects_recursively}
-\title{Title}
+\title{Saves a nested list as a folder of single files}
 \usage{
 .save_objects_recursively(
   object,
   name,
   dir,
+  type = NULL,
   silent = F,
   redo = T,
   list_as_folders = T,
@@ -17,24 +18,30 @@
 )
 }
 \arguments{
-\item{object}{}
+\item{object}{list or single object to be saved}
 
-\item{name}{}
+\item{name}{name of the folder or file}
 
-\item{dir}{}
+\item{dir}{folder the object is saved in}
 
-\item{silent}{}
+\item{type}{(optional) file type used for every table in the list}
 
-\item{redo}{}
+\item{silent}{Should messages be suppressed?}
 
-\item{list_as_folders}{}
+\item{redo}{Should existing files be written again?}
 
-\item{clean_memory}{}
+\item{list_as_folders}{Should nested lists become nested folders?}
 
-\item{partitioning}{}
+\item{clean_memory}{Should the memory be cleaned with gc()/cleanMem() afer
+writing}
 
-\item{...}{}
+\item{partitioning}{Should the parquet files be split into}
+
+\item{...}{additional arguments for the saving function}
+}
+\value{
+TRUE (invisibly)
 }
 \description{
-Title
+Saves a nested list as a folder of single files
 }

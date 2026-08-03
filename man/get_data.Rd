@@ -20,6 +20,18 @@ useful if file is an R object and fallback is a hardcoded string}
 
 \item{...}{additional arguments}
 }
+\value{
+a tibble, or an Arrow dataset connection if as_arrow_table = T; the
+object itself if \if{html}{\out{<file>}} is not a file path
+}
 \description{
 Loads data from a file name or returns if already in R
+}
+\examples{
+  data_small <- tibble::tibble(a = 1:3, b = letters[1:3]) \%>\%
+    write_data(file = "data_small", 
+               dir = tempdir(), 
+               type = "tsv")
+
+  get_data(data_small)
 }

@@ -4,7 +4,11 @@
 \alias{tempdir_remove}
 \title{Removing all temporary files saved by write_data() when}
 \usage{
-tempdir_remove(dir = tempdir(), all.paths = F, pattern = ".Rds|.parquet|.pdf")
+tempdir_remove(
+  dir = tempdir(),
+  all.paths = F,
+  pattern = ".Rds|.parquet|.tsv|.csv|.txt|.pdf"
+)
 }
 \arguments{
 \item{dir}{location of temporary files}

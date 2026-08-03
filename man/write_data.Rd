@@ -2,13 +2,15 @@
 % Please edit documentation in R/get_write_data.R
 \name{write_data}
 \alias{write_data}
-\title{Writes data to a file or temporary file}
+\title{Writes data to one or several files}
 \usage{
 write_data(
   x,
   file,
   dir,
+  type,
   redo = T,
+  return_path = T,
   list_as_folders = T,
   clean_memory = F,
   silent = F,
@@ -25,17 +27,30 @@ determined automatically)}
 \item{dir}{(optional) folder name if easier to specify separate from file
 name}
 
+\item{type}{(optional) one or several file types to write ("parquet", "rds",
+"tsv", "csv" or "txt"); the path of the first type is returned}
+
 \item{redo}{Should the computation be skipped, if file of given name already
 exists? File name will still be returned.}
 
-\item{clean_memory}{Should the memory be cleaned with gc()/cleanMem() afer
+\item{return_path}{Should the saved file path be return or the file itself?}
+
+\item{list_as_folders}{Should a list be saved as a folder of single files
+instead of one .Rds file?}
+
+\item{clean_memory}{Should the memory be cleaned with gc()/cleanMem() after
 writing}
 
 \item{silent}{Should messages be suppressed?}
 
-\item{partitioning}{Should the parquet file be split into}
+\item{partitioning}{Should the parquet file be split into (parquet only)}
 
-\item{...}{additional arguments for the saving function}
+\item{...}{additional arguments for the saving function; passed on to every
+given \if{html}{\out{<type>}}, so format-specific arguments only work with a single type}
+}
+\value{
+file path of the written file, or the path of the first given
+\if{html}{\out{<type>}} if several types were written
 }
 \description{
 \code{write_data()} decides whether to save the file in the .parquet format if
@@ -43,4 +58,21 @@ possible or as an .Rds file and returns the final file path. If no file
 name is given, a temporary file will be saved. Depending on the file and
 arguments \code{arrow::write_parquet()}, \code{arrow::write_dataset()} or R's native
 \code{saveRDS()} will be used. If redo = F, the function checks if the computation can be skipped.
+}
+\details{
+Giving one or several file types via \if{html}{\out{<type>}} overrides this automatic choice.
+Tables can be written as "parquet", "rds", "tsv", "csv" or "txt"; delimited
+files are written with \code{arrow::write_csv_arrow()} and ".txt" is
+tab-separated. When several types are given, all files are written but only
+the path of the first type is returned, so
+\code{write_data(x, "data_main", "Data", type = c("parquet", "tsv"))} keeps the
+pipeline on the parquet file and drops a readable .tsv next to it.
+}
+\examples{
+  data_small <- tibble::tibble(a = 1:3, b = letters[1:3]) \%>\%
+    write_data(file = "data_small", 
+               dir = tempdir(), 
+               type = c("parquet", "tsv"))
+
+  get_data(data_small)
 }
