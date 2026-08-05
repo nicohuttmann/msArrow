@@ -4,10 +4,10 @@ Version: 0.0.0.9000
 Authors@R:
     person("Nico", "Hüttmann", , "huttmann.nico@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9321-2675"))
-Description: Convenient wrappers around some 'arrow' and 'nanoparquet'
-    functions for handling large mass spectrometry data, plus an
-    opinionated way to organise datasets. Data are kept on disk as parquet
-    or delimited files and referenced by path rather than held in memory.
+Description: Convenient wrappers around some 'arrow' functions for handling 
+    large mass spectrometry data, plus an opinionated way to organise datasets. 
+    Data are kept on disk as parquet or delimited files and referenced by path 
+    rather than held in memory.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -20,7 +20,6 @@ Imports:
     dplyr,
     magrittr,
     methods,
-    nanoparquet,
     purrr,
     rlang,
     scales,

@@ -103,14 +103,17 @@ get_data_frame <- function(which,
     
     data <- data %>% 
       dplyr::collect() %>% 
-      tibble2data_frame()
+      dplyr::rename(rowname = 1) %>%
+      tibble::column_to_rownames()
     
     # Matrix
   } else if (grepl(pattern = "matrix", x = output.type)) {
     
     data <- data %>% 
       dplyr::collect() %>%
-      tibble2matrix()
+      dplyr::rename(rowname = 1) %>%
+      tibble::column_to_rownames() %>%
+      as.matrix()
     
   } else {
     
