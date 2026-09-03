@@ -7,3 +7,5 @@ Output/
 .positai
 docs/
 inst/doc
+
+.claude/

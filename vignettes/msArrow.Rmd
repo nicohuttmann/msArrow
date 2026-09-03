@@ -157,6 +157,6 @@ unlink(dir, recursive = TRUE)
 
 For annotated datasets — variables, observations and long
 `observations x variables` frames kept together on disk, and DIA-NN reports
-imported straight into that layout — see `import_diann()`, `get_data_frame()`
-and `get_variables_data()` in the
-[reference](https://nicohuttmann.github.io/msArrow/reference/).
+imported straight into that layout — see
+[msTools](https://nicohuttmann.github.io/msTools/), which builds that store on
+top of the functions shown here.
