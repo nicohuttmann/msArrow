@@ -63,6 +63,38 @@ open_data(data_raw) %>%
   collect()
 ```
 
+## Looking at a file
+
+Often you only want to know what is in a file. `preview_data()` collects the
+first rows and nothing else, and reports the total, which it reads from the
+file metadata rather than by counting.
+
+```{r}
+preview_data(data_raw, n = 4)
+```
+
+The result is a plain tibble, so it pipes like any other, and it carries the
+total as an attribute:
+
+```{r}
+attr(preview_data(data_raw, n = 4, silent = TRUE), "total_rows")
+```
+
+`view_data()` is the same thing handed to the data viewer. It looks `View()` up
+on the search path, so in RStudio you get RStudio's viewer -- with its column
+types, sorting and filtering -- rather than base R's plain window, and the
+counts are printed after the pane opens. It returns the preview invisibly, so
+it is safe to leave in a script: outside an interactive session it opens
+nothing.
+
+```{r}
+invisible(view_data(data_raw, n = 4))
+```
+
+Neither reads past the rows it shows. On a 2.5 million-row parquet file a
+five-row preview takes about a tenth of a second, and the saving is in memory
+more than time -- nothing but those rows ever enters the session.
+
 ## Choosing the file type
 
 Left alone, `write_data()` decides for itself: parquet when Arrow can
@@ -140,6 +172,21 @@ list.files(data_split)
 get_data(data_split)$t8
 ```
 
+Previewing one of these shows a single dataset by default, because there is
+more than one thing to show and `view_data()` would otherwise open a viewer
+pane per element:
+
+```{r}
+preview_data(data_split, n = 3)
+```
+
+Give `n` a second number, `c(rows, datasets)`, to see more. The message names
+the call that would show everything, so it can be copied out of the console:
+
+```{r}
+preview_data(data_split, n = c(3, 2))
+```
+
 ## Where the files went
 
 Without a `file` name, `write_data()` writes into `tempdir()`. These helpers
@@ -153,10 +200,3 @@ length(tempdir_list())
 unlink(dir, recursive = TRUE)
 ```
 
-## Next steps
-
-For annotated datasets — variables, observations and long
-`observations x variables` frames kept together on disk, and DIA-NN reports
-imported straight into that layout — see
-[msTools](https://nicohuttmann.github.io/msTools/), which builds that store on
-top of the functions shown here.
