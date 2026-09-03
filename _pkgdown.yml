@@ -25,6 +25,14 @@ reference:
   - open_data
   - get_data_m
 
+- title: Looking at a file
+  desc: >
+    Read the first rows of something large without loading it. Both report how
+    many rows the file actually holds, which costs nothing to look up.
+  contents:
+  - preview_data
+  - view_data
+
 - title: Temporary files
   desc: >
     `write_data()` without a file name writes into `tempdir()`. These list,

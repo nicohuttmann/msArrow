@@ -524,6 +524,13 @@ open_data <- function(file,
       if (class(file)[1] == "list") data_object <- purrr::map(file, get_data)
       else data_object <- file
       
+    } else if (tolower(tools::file_ext(file)) == "parquetlist") {
+
+      data_object <- .read_objects_recursively(name = file, 
+                                               silent = T, 
+                                               as_arrow_table = T, 
+                                               ...)
+
     }  else if (tolower(tools::file_ext(file)) == "rds") {
       
       if (recursive) data_object <- readRDS(file) %>%
@@ -752,7 +759,9 @@ tempdir_remove <- function(dir = tempdir(),
                                     paste(exclude, j, sep = "|")
                                   else 
                                     exclude, 
-                                  silent = silent)
+                                  silent = silent, 
+                                  as_arrow_table = as_arrow_table, 
+                                  ...)
     }
     
   } else if (!is.null(exclude) && stringr::str_detect(name, exclude)) {
