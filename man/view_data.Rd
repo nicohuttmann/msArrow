@@ -18,7 +18,8 @@ view_data(
 \arguments{
 \item{file}{file name}
 
-\item{n}{number of rows to read}
+\item{n}{number of rows to read, or \code{c(rows, datasets)} for a
+\code{.parquetlist}, where the second number defaults to 1}
 
 \item{fallback}{other file name or alternative way to provide the input -
 useful if file is an R object and fallback is a hardcoded string}
@@ -47,6 +48,10 @@ returned invisibly either way, so the same call is safe inside a script.
 \code{View()} is looked up on the search path rather than called as
 \code{utils::View()}, so an RStudio session gets RStudio's data viewer instead of
 base R's separate window.
+
+The viewer is opened before the row counts are reported, so the message is
+the last thing in the console once the data is up. For a \code{.parquetlist},
+\if{html}{\out{<n>}} takes a second number giving how many datasets to open, one by default.
 }
 \examples{
   data_small <- tibble::tibble(a = 1:100, b = rnorm(100)) \%>\%

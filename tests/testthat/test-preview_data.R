@@ -60,21 +60,66 @@ test_that("preview_data() works on a partitioned dataset directory", {
 })
 
 
-test_that("preview_data() previews each element of a .parquetlist separately", {
+test_that("a .parquetlist shows only the first dataset by default", {
 
   dir <- withr::local_tempdir()
 
   path <- write_data(list(first  = test_table(5),
-                          second = test_table(7)),
+                          second = test_table(7),
+                          third  = test_table(9)),
                      "lst", dir, silent = T)
 
   out <- preview_data(path, n = 3, silent = T)
 
   expect_type(out, "list")
-  expect_named(out, c("first", "second"), ignore.order = TRUE)
+  expect_named(out, "first")
   expect_equal(nrow(out$first), 3)
   expect_equal(attr(out$first, "total_rows"), 5)
-  expect_equal(attr(out$second, "total_rows"), 7)
+  expect_equal(attr(out, "total_sets"), 3)
+})
+
+
+test_that("the second number of <n> says how many datasets to show", {
+
+  dir <- withr::local_tempdir()
+
+  path <- write_data(list(first  = test_table(5),
+                          second = test_table(7),
+                          third  = test_table(9)),
+                     "lst", dir, silent = T)
+
+  two <- preview_data(path, n = c(3, 2), silent = T)
+  expect_named(two, c("first", "second"))
+  expect_equal(nrow(two$second), 3)
+  expect_equal(attr(two$second, "total_rows"), 7)
+
+  all <- preview_data(path, n = c(3, 3), silent = T)
+  expect_named(all, c("first", "second", "third"))
+
+  # asking for more than there are is not an error
+  expect_named(preview_data(path, n = c(3, 99), silent = T),
+               c("first", "second", "third"))
+})
+
+
+test_that("the message says how to see the datasets that were left out", {
+
+  dir <- withr::local_tempdir()
+
+  path <- write_data(list(first  = test_table(5),
+                          second = test_table(7),
+                          third  = test_table(9)),
+                     "lst", dir, silent = T)
+
+  expect_output(preview_data(path, n = 4), "2 more datasets not shown")
+  expect_output(preview_data(path, n = 4), "n = c(4, 3) to show all", fixed = TRUE)
+
+  # singular when only one is hidden
+  expect_output(preview_data(path, n = c(4, 2)), "1 more dataset not shown")
+
+  # and no hint once everything is shown
+  out <- capture.output(preview_data(path, n = c(4, 3)))
+  expect_false(any(grepl("not shown", out)))
 })
 
 
@@ -86,7 +131,7 @@ test_that("a .parquetlist of different schemas is not flattened", {
                           second = tibble::tibble(x = 1:2, y = 3:4, z = 5:6)),
                      "mixed", dir, silent = T)
 
-  out <- preview_data(path, n = 10, silent = T)
+  out <- preview_data(path, n = c(10, 2), silent = T)
 
   # both elements survive, with their own columns
   expect_named(out$first, c("a", "b"))
@@ -205,4 +250,28 @@ test_that("view_data() uses the View() on the search path, not utils::View()", {
 
   expect_equal(nrow(seen$x), 2)
   expect_equal(seen$title, "masked.parquet")
+})
+
+
+
+test_that("view_data() reports after the viewer, and honours silent", {
+
+  dir <- withr::local_tempdir()
+  path <- write_data(test_table(12), "v2", dir, silent = T)
+
+  expect_output(view_data(path, n = 3), "Showing 3 of 12 rows")
+  expect_silent(view_data(path, n = 3, silent = T))
+})
+
+
+test_that("view_data() passes the dataset count through to the hint", {
+
+  dir <- withr::local_tempdir()
+  path <- write_data(list(a = test_table(4),
+                          b = test_table(6)),
+                     "vl2", dir, silent = T)
+
+  out <- view_data(path, n = 2)
+  expect_named(out, "a")
+  expect_equal(attr(out, "total_sets"), 2)
 })

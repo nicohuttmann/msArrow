@@ -4,16 +4,12 @@
 \alias{.preview_one}
 \title{Collects the first rows of one opened object}
 \usage{
-.preview_one(x, n, silent = F, label = NULL)
+.preview_one(x, n)
 }
 \arguments{
 \item{x}{an opened connection or a data frame}
 
 \item{n}{number of rows to read}
-
-\item{silent}{Should the message reporting the row counts be suppressed?}
-
-\item{label}{name printed in front of the message, used for list elements}
 }
 \value{
 a tibble of the first \if{html}{\out{<n>}} rows carrying a \code{total_rows} attribute

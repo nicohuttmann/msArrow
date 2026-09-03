@@ -17,7 +17,8 @@ preview_data(
 \arguments{
 \item{file}{file name}
 
-\item{n}{number of rows to read}
+\item{n}{number of rows to read, or \code{c(rows, datasets)} for a
+\code{.parquetlist}, where the second number defaults to 1}
 
 \item{fallback}{other file name or alternative way to provide the input -
 useful if file is an R object and fallback is a hardcoded string}
@@ -47,8 +48,10 @@ and is attached to the result as the attribute \code{total_rows}; unless \if{htm
 is TRUE a line reporting \verb{Showing <n> of <total_rows> rows} is printed. The
 result is otherwise a plain tibble.
 
-A \code{.parquetlist} folder holds a list rather than a single table, so a named
-list of previews is returned, one per element.
+A \code{.parquetlist} folder holds several datasets rather than a single table.
+Only the first is shown by default; give \if{html}{\out{<n>}} a second number to ask for
+more, so \code{n = c(10, 5)} takes ten rows of each of the first five datasets.
+The message then says how many were left out and what to pass to see them.
 }
 \examples{
   data_small <- tibble::tibble(a = 1:100, b = rnorm(100)) \%>\%
