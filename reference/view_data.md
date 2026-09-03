@@ -31,7 +31,8 @@ view_data(
 
 - n:
 
-  number of rows to read
+  number of rows to read, or `c(rows, datasets)` for a `.parquetlist`,
+  where the second number defaults to 1
 
 - fallback:
 
@@ -70,6 +71,11 @@ path rather than called as
 [`utils::View()`](https://rdrr.io/r/utils/View.html), so an RStudio
 session gets RStudio's data viewer instead of base R's separate window.
 
+The viewer is opened before the row counts are reported, so the message
+is the last thing in the console once the data is up. For a
+`.parquetlist`, takes a second number giving how many datasets to open,
+one by default.
+
 ## Examples
 
 ``` r
@@ -77,7 +83,7 @@ session gets RStudio's data viewer instead of base R's separate window.
     write_data(file = "data_small", 
                dir = tempdir(), 
                type = "parquet")
-#> Saving file "/tmp/RtmpaYkuwS/data_small.parquet". Done!
+#> Saving file "/tmp/Rtmp5Bs4pJ/data_small.parquet". Done!
 
   view_data(data_small, n = 5)
 #> Showing 5 of 100 rows

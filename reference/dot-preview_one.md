@@ -5,7 +5,7 @@ Collects the first rows of one opened object
 ## Usage
 
 ``` r
-.preview_one(x, n, silent = F, label = NULL)
+.preview_one(x, n)
 ```
 
 ## Arguments
@@ -17,14 +17,6 @@ Collects the first rows of one opened object
 - n:
 
   number of rows to read
-
-- silent:
-
-  Should the message reporting the row counts be suppressed?
-
-- label:
-
-  name printed in front of the message, used for list elements
 
 ## Value
 

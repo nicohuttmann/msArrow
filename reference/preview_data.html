@@ -71,7 +71,8 @@ session.</n></file></p>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
-<dd><p>number of rows to read</p></dd>
+<dd><p>number of rows to read, or <code>c(rows, datasets)</code> for a
+<code>.parquetlist</code>, where the second number defaults to 1</p></dd>
 
 
 <dt id="arg-fallback">fallback<a class="anchor" aria-label="anchor" href="#arg-fallback"></a></dt>
@@ -106,8 +107,10 @@ or a named list of such tibbles for a <code>.parquetlist</code></n></p>
 and is attached to the result as the attribute <code>total_rows</code>; unless <silent>
 is TRUE a line reporting <code>Showing &lt;n&gt; of &lt;total_rows&gt; rows</code> is printed. The
 result is otherwise a plain tibble.</silent></p>
-<p>A <code>.parquetlist</code> folder holds a list rather than a single table, so a named
-list of previews is returned, one per element.</p>
+<p>A <code>.parquetlist</code> folder holds several datasets rather than a single table.
+Only the first is shown by default; give <n> a second number to ask for
+more, so <code>n = c(10, 5)</code> takes ten rows of each of the first five datasets.
+The message then says how many were left out and what to pass to see them.</n></p>
     </div>
 
     <div class="section level2">
@@ -116,7 +119,7 @@ list of previews is returned, one per element.</p>
 <span class="r-in"><span>    <span class="fu"><a href="write_data.html">write_data</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"data_small"</span>, </span></span>
 <span class="r-in"><span>               dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>               type <span class="op">=</span> <span class="st">"parquet"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Saving file "/tmp/RtmpaYkuwS/data_small.parquet". Done!</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Saving file "/tmp/Rtmp5Bs4pJ/data_small.parquet". Done!</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu">preview_data</span><span class="op">(</span><span class="va">data_small</span>, n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Showing 5 of 100 rows</span>

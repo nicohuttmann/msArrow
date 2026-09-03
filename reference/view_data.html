@@ -69,7 +69,8 @@ returned invisibly either way, so the same call is safe inside a script.</n></p>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
-<dd><p>number of rows to read</p></dd>
+<dd><p>number of rows to read, or <code>c(rows, datasets)</code> for a
+<code>.parquetlist</code>, where the second number defaults to 1</p></dd>
 
 
 <dt id="arg-fallback">fallback<a class="anchor" aria-label="anchor" href="#arg-fallback"></a></dt>
@@ -107,6 +108,9 @@ useful if file is an R object and fallback is a hardcoded string</p></dd>
     <p><code><a href="https://rdrr.io/r/utils/View.html" class="external-link">View()</a></code> is looked up on the search path rather than called as
 <code><a href="https://rdrr.io/r/utils/View.html" class="external-link">utils::View()</a></code>, so an RStudio session gets RStudio's data viewer instead of
 base R's separate window.</p>
+<p>The viewer is opened before the row counts are reported, so the message is
+the last thing in the console once the data is up. For a <code>.parquetlist</code>,
+<n> takes a second number giving how many datasets to open, one by default.</n></p>
     </div>
 
     <div class="section level2">
@@ -115,7 +119,7 @@ base R's separate window.</p>
 <span class="r-in"><span>    <span class="fu"><a href="write_data.html">write_data</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"data_small"</span>, </span></span>
 <span class="r-in"><span>               dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>               type <span class="op">=</span> <span class="st">"parquet"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Saving file "/tmp/RtmpaYkuwS/data_small.parquet". Done!</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Saving file "/tmp/Rtmp5Bs4pJ/data_small.parquet". Done!</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu">view_data</span><span class="op">(</span><span class="va">data_small</span>, n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Showing 5 of 100 rows</span>

@@ -30,7 +30,8 @@ preview_data(
 
 - n:
 
-  number of rows to read
+  number of rows to read, or `c(rows, datasets)` for a `.parquetlist`,
+  where the second number defaults to 1
 
 - fallback:
 
@@ -65,8 +66,11 @@ nothing, and is attached to the result as the attribute `total_rows`;
 unless is TRUE a line reporting `Showing <n> of <total_rows> rows` is
 printed. The result is otherwise a plain tibble.
 
-A `.parquetlist` folder holds a list rather than a single table, so a
-named list of previews is returned, one per element.
+A `.parquetlist` folder holds several datasets rather than a single
+table. Only the first is shown by default; give a second number to ask
+for more, so `n = c(10, 5)` takes ten rows of each of the first five
+datasets. The message then says how many were left out and what to pass
+to see them.
 
 ## Examples
 
@@ -75,7 +79,7 @@ named list of previews is returned, one per element.
     write_data(file = "data_small", 
                dir = tempdir(), 
                type = "parquet")
-#> Saving file "/tmp/RtmpaYkuwS/data_small.parquet". Done!
+#> Saving file "/tmp/Rtmp5Bs4pJ/data_small.parquet". Done!
 
   preview_data(data_small, n = 5)
 #> Showing 5 of 100 rows
