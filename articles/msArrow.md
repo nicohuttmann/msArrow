@@ -37,10 +37,10 @@ data_raw <- tibble::tibble(
                      5.5,  6.1,  5.9,  6.4,
                     22.0, 21.3, 30.7, 29.9)) %>%
   write_data(file = "data_raw", dir = dir)
-#> Saving file "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/data_raw.parquet". Done!
+#> Saving file "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/data_raw.parquet". Done!
 
 data_raw
-#> [1] "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/data_raw.parquet"
+#> [1] "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/data_raw.parquet"
 ```
 
 The variable is a path. To use it, read it:
@@ -82,6 +82,54 @@ open_data(data_raw) %>%
 #> 3 O00305           30.3
 ```
 
+## Looking at a file
+
+Often you only want to know what is in a file.
+[`preview_data()`](https://nicohuttmann.github.io/msArrow/reference/preview_data.md)
+collects the first rows and nothing else, and reports the total, which
+it reads from the file metadata rather than by counting.
+
+``` r
+
+preview_data(data_raw, n = 4)
+#> Showing 4 of 12 rows
+#> # A tibble: 4 × 3
+#>   Protein.Group Condition Intensity
+#>   <chr>         <chr>         <dbl>
+#> 1 P12345        ctrl           10.1
+#> 2 P12345        ctrl           11.4
+#> 3 P12345        t8             15.2
+#> 4 P12345        t8             14.8
+```
+
+The result is a plain tibble, so it pipes like any other, and it carries
+the total as an attribute:
+
+``` r
+
+attr(preview_data(data_raw, n = 4, silent = TRUE), "total_rows")
+#> [1] 12
+```
+
+[`view_data()`](https://nicohuttmann.github.io/msArrow/reference/view_data.md)
+is the same thing handed to the data viewer. It looks
+[`View()`](https://rdrr.io/r/utils/View.html) up on the search path, so
+in RStudio you get RStudio’s viewer – with its column types, sorting and
+filtering – rather than base R’s plain window, and the counts are
+printed after the pane opens. It returns the preview invisibly, so it is
+safe to leave in a script: outside an interactive session it opens
+nothing.
+
+``` r
+
+invisible(view_data(data_raw, n = 4))
+#> Showing 4 of 12 rows
+```
+
+Neither reads past the rows it shows. On a 2.5 million-row parquet file
+a five-row preview takes about a tenth of a second, and the saving is in
+memory more than time – nothing but those rows ever enters the session.
+
 ## Choosing the file type
 
 Left alone,
@@ -99,8 +147,8 @@ data_summary <- get_data(data_raw) %>%
             n        = n(),
             .by      = c(Protein.Group, Condition)) %>%
   write_data(file = "data_summary", dir = dir, type = c("parquet", "tsv"))
-#> Saving file "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/data_summary.parquet". Done!
-#> Saving file "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/data_summary.tsv". Done!
+#> Saving file "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/data_summary.parquet". Done!
+#> Saving file "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/data_summary.tsv". Done!
 
 list.files(dir, pattern = "data_summary")
 #> [1] "data_summary.parquet" "data_summary.tsv"
@@ -125,7 +173,7 @@ get_data(data_raw) %>%
   distinct(Protein.Group) %>%
   write_data(file = "protein_list", dir = dir, type = "tsv") %>%
   get_data()
-#> Saving file "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/protein_list.tsv". Done!
+#> Saving file "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/protein_list.tsv". Done!
 #> # A tibble: 3 × 1
 #>   Protein.Group
 #>   <chr>        
@@ -143,7 +191,7 @@ containing a tab or comma still round-trips:
 tibble::tibble(Genes = c("A,B", "C\tD"), n = 1:2) %>%
   write_data(file = "tricky", dir = dir, type = "tsv") %>%
   get_data()
-#> Saving file "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/tricky.tsv". Done!
+#> Saving file "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/tricky.tsv". Done!
 #> # A tibble: 2 × 2
 #>   Genes      n
 #>   <chr>  <int>
@@ -165,8 +213,8 @@ have not changed:
 ``` r
 
 write_data(get_data(data_raw), file = "data_raw", dir = dir, redo = FALSE)
-#> Returning location of existing file "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/data_raw.parquet".
-#> [1] "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/data_raw.parquet"
+#> Returning location of existing file "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/data_raw.parquet".
+#> [1] "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/data_raw.parquet"
 ```
 
 With several types, the computation is skipped only when *every*
@@ -183,9 +231,9 @@ a single element can be read without loading the rest.
 data_split <- get_data(data_raw) %>%
   split(.$Condition) %>%
   write_data(file = "by_condition", dir = dir)
-#> Creating folder "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/by_condition.parquetlist". Done!
-#> Saving file "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/by_condition.parquetlist/ctrl.parquet". Done!
-#> Saving file "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/by_condition.parquetlist/t8.parquet". Done!
+#> Creating folder "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/by_condition.parquetlist". Done!
+#> Saving file "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/by_condition.parquetlist/ctrl.parquet". Done!
+#> Saving file "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/by_condition.parquetlist/t8.parquet". Done!
 
 list.files(data_split)
 #> [1] "ctrl.parquet" "t8.parquet"
@@ -202,6 +250,57 @@ get_data(data_split)$t8
 #> 6 O00305        t8             29.9
 ```
 
+Previewing one of these shows a single dataset by default, because there
+is more than one thing to show and
+[`view_data()`](https://nicohuttmann.github.io/msArrow/reference/view_data.md)
+would otherwise open a viewer pane per element:
+
+``` r
+
+preview_data(data_split, n = 3)
+#> ctrl: Showing 3 of 6 rows
+#>   1 more dataset not shown - use n = c(3, 2) to show all
+#> $ctrl
+#> # A tibble: 3 × 3
+#>   Protein.Group Condition Intensity
+#>   <chr>         <chr>         <dbl>
+#> 1 P12345        ctrl           10.1
+#> 2 P12345        ctrl           11.4
+#> 3 Q9Y6K9        ctrl            5.5
+#> 
+#> attr(,"total_sets")
+#> [1] 2
+```
+
+Give `n` a second number, `c(rows, datasets)`, to see more. The message
+names the call that would show everything, so it can be copied out of
+the console:
+
+``` r
+
+preview_data(data_split, n = c(3, 2))
+#> ctrl: Showing 3 of 6 rows
+#> t8: Showing 3 of 6 rows
+#> $ctrl
+#> # A tibble: 3 × 3
+#>   Protein.Group Condition Intensity
+#>   <chr>         <chr>         <dbl>
+#> 1 P12345        ctrl           10.1
+#> 2 P12345        ctrl           11.4
+#> 3 Q9Y6K9        ctrl            5.5
+#> 
+#> $t8
+#> # A tibble: 3 × 3
+#>   Protein.Group Condition Intensity
+#>   <chr>         <chr>         <dbl>
+#> 1 P12345        t8             15.2
+#> 2 P12345        t8             14.8
+#> 3 Q9Y6K9        t8              5.9
+#> 
+#> attr(,"total_sets")
+#> [1] 2
+```
+
 ## Where the files went
 
 Without a `file` name,
@@ -214,11 +313,3 @@ helpers show what has accumulated and clear it:
 length(tempdir_list())
 #> [1] 0
 ```
-
-## Next steps
-
-For annotated datasets — variables, observations and long
-`observations x variables` frames kept together on disk, and DIA-NN
-reports imported straight into that layout — see
-[msTools](https://nicohuttmann.github.io/msTools/), which builds that
-store on top of the functions shown here.

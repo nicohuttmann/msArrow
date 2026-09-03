@@ -47,7 +47,7 @@ object itself if is not a file path
     write_data(file = "data_small", 
                dir = tempdir(), 
                type = "tsv")
-#> Saving file "/tmp/Rtmp5Bs4pJ/data_small.tsv". Done!
+#> Saving file "/tmp/RtmpYdk2N8/data_small.tsv". Done!
 
   get_data(data_small)
 #> # A tibble: 3 × 2

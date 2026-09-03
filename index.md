@@ -89,6 +89,49 @@ open_data("Data/data_main.tsv") %>%
 [`get_data()`](https://nicohuttmann.github.io/msArrow/reference/get_data.md)
 already collects, so it never needs a trailing `collect()`.
 
+## Looking at a file
+
+[`preview_data()`](https://nicohuttmann.github.io/msArrow/reference/preview_data.md)
+reads only the first rows, so a file with millions of them can be
+inspected without loading it. The total comes from the file metadata,
+which costs nothing, so it can tell you what fraction you are looking
+at:
+
+``` r
+
+preview_data("Data/data_curves.parquet", n = 5)
+#> Showing 5 of 2,981,204 rows
+```
+
+[`view_data()`](https://nicohuttmann.github.io/msArrow/reference/view_data.md)
+does the same and hands the result to the data viewer — RStudio’s own,
+so you keep column types, sorting and filtering — and reports
+afterwards, so the counts stay in the console once the pane is up:
+
+``` r
+
+view_data("Data/data_curves.parquet")
+```
+
+Both return the preview,
+[`view_data()`](https://nicohuttmann.github.io/msArrow/reference/view_data.md)
+invisibly, and both attach the total as a `total_rows` attribute.
+Neither reads past the rows it shows: previewing a 2.5 M-row file takes
+about 0.1 s.
+
+A `.parquetlist` holds several datasets rather than one table. Only the
+first is shown by default; `n` takes a second number,
+`c(rows, datasets)`, and the message says what to pass to see the rest:
+
+``` r
+
+view_data("Data/by_group.parquetlist")
+#> controls: Showing 10 of 40 rows
+#>   3 more datasets not shown - use n = c(10, 4) to show all
+
+view_data("Data/by_group.parquetlist", n = c(5, 4))
+```
+
 ## Organising datasets
 
 The dataset store — variables (precursors, peptides, proteins),

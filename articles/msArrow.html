@@ -92,10 +92,10 @@ wrote. Every step downstream re-reads that file.</p>
 <span>                     <span class="fl">5.5</span>,  <span class="fl">6.1</span>,  <span class="fl">5.9</span>,  <span class="fl">6.4</span>,</span>
 <span>                    <span class="fl">22.0</span>, <span class="fl">21.3</span>, <span class="fl">30.7</span>, <span class="fl">29.9</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/write_data.html">write_data</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"data_raw"</span>, dir <span class="op">=</span> <span class="va">dir</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Saving file "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/data_raw.parquet". Done!</span></span>
+<span><span class="co">#&gt; Saving file "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/data_raw.parquet". Done!</span></span>
 <span></span>
 <span><span class="va">data_raw</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/data_raw.parquet"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/data_raw.parquet"</span></span></code></pre></div>
 <p>The variable is a path. To use it, read it:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span><span class="va">data_raw</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -128,6 +128,42 @@ runs before anything is pulled into R.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> O00305           30.3</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="looking-at-a-file">Looking at a file<a class="anchor" aria-label="anchor" href="#looking-at-a-file"></a>
+</h2>
+<p>Often you only want to know what is in a file.
+<code><a href="../reference/preview_data.html">preview_data()</a></code> collects the first rows and nothing else,
+and reports the total, which it reads from the file metadata rather than
+by counting.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/preview_data.html">preview_data</a></span><span class="op">(</span><span class="va">data_raw</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Showing 4 of 12 rows</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 3</span></span></span>
+<span><span class="co">#&gt;   Protein.Group Condition Intensity</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> P12345        ctrl           10.1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> P12345        ctrl           11.4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> P12345        t8             15.2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> P12345        t8             14.8</span></span></code></pre></div>
+<p>The result is a plain tibble, so it pipes like any other, and it
+carries the total as an attribute:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="fu"><a href="../reference/preview_data.html">preview_data</a></span><span class="op">(</span><span class="va">data_raw</span>, n <span class="op">=</span> <span class="fl">4</span>, silent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"total_rows"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 12</span></span></code></pre></div>
+<p><code><a href="../reference/view_data.html">view_data()</a></code> is the same thing handed to the data viewer.
+It looks <code><a href="https://rdrr.io/r/utils/View.html" class="external-link">View()</a></code> up on the search path, so in RStudio you
+get RStudio’s viewer – with its column types, sorting and filtering –
+rather than base R’s plain window, and the counts are printed after the
+pane opens. It returns the preview invisibly, so it is safe to leave in
+a script: outside an interactive session it opens nothing.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="../reference/view_data.html">view_data</a></span><span class="op">(</span><span class="va">data_raw</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Showing 4 of 12 rows</span></span></code></pre></div>
+<p>Neither reads past the rows it shows. On a 2.5 million-row parquet
+file a five-row preview takes about a tenth of a second, and the saving
+is in memory more than time – nothing but those rows ever enters the
+session.</p>
+</div>
+<div class="section level2">
 <h2 id="choosing-the-file-type">Choosing the file type<a class="anchor" aria-label="anchor" href="#choosing-the-file-type"></a>
 </h2>
 <p>Left alone, <code><a href="../reference/write_data.html">write_data()</a></code> decides for itself: parquet
@@ -136,20 +172,20 @@ for a list, <code>.Rds</code> otherwise.</p>
 <p>The <code>type</code> argument overrides that. It takes one or
 several of <code>parquet</code>, <code>rds</code>, <code>tsv</code>,
 <code>csv</code> and <code>txt</code>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span><span class="va">data_raw</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>mean_int <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">Intensity</span><span class="op">)</span>,</span>
 <span>            n        <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>            .by      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">Protein.Group</span>, <span class="va">Condition</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/write_data.html">write_data</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"data_summary"</span>, dir <span class="op">=</span> <span class="va">dir</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"parquet"</span>, <span class="st">"tsv"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Saving file "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/data_summary.parquet". Done!</span></span>
-<span><span class="co">#&gt; Saving file "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/data_summary.tsv". Done!</span></span>
+<span><span class="co">#&gt; Saving file "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/data_summary.parquet". Done!</span></span>
+<span><span class="co">#&gt; Saving file "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/data_summary.tsv". Done!</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">dir</span>, pattern <span class="op">=</span> <span class="st">"data_summary"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "data_summary.parquet" "data_summary.tsv"</span></span></code></pre></div>
 <p>Both files were written. <strong>The returned path is the first type
 only</strong>:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">data_summary</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "data_summary.parquet"</span></span></code></pre></div>
 <p>That is the point of the ordering. A pipeline stays on the fast
@@ -157,12 +193,12 @@ parquet file, while a <code>.tsv</code> that a collaborator can open
 lands beside it without a second line of code. For a small table that
 only ever needs to be human-readable, <code>type = "tsv"</code> on its
 own does the job:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span><span class="va">data_raw</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">Protein.Group</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/write_data.html">write_data</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"protein_list"</span>, dir <span class="op">=</span> <span class="va">dir</span>, type <span class="op">=</span> <span class="st">"tsv"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Saving file "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/protein_list.tsv". Done!</span></span>
+<span><span class="co">#&gt; Saving file "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/protein_list.tsv". Done!</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 1</span></span></span>
 <span><span class="co">#&gt;   Protein.Group</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        </span></span>
@@ -173,11 +209,11 @@ own does the job:</p>
 comma-separated. Delimited files are written through Arrow, and values
 are quoted where needed so a field containing a tab or comma still
 round-trips:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>Genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A,B"</span>, <span class="st">"C\tD"</span><span class="op">)</span>, n <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/write_data.html">write_data</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"tricky"</span>, dir <span class="op">=</span> <span class="va">dir</span>, type <span class="op">=</span> <span class="st">"tsv"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Saving file "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/tricky.tsv". Done!</span></span>
+<span><span class="co">#&gt; Saving file "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/tricky.tsv". Done!</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 2</span></span></span>
 <span><span class="co">#&gt;   Genes      n</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
@@ -194,10 +230,10 @@ than a silently mangled file.</p>
 <code>redo = FALSE</code> to return the existing path instead, when a
 step is genuinely expensive and you are sure the inputs have not
 changed:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/write_data.html">write_data</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span><span class="va">data_raw</span><span class="op">)</span>, file <span class="op">=</span> <span class="st">"data_raw"</span>, dir <span class="op">=</span> <span class="va">dir</span>, redo <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Returning location of existing file "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/data_raw.parquet".</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/data_raw.parquet"</span></span></code></pre></div>
+<span><span class="co">#&gt; Returning location of existing file "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/data_raw.parquet".</span></span>
+<span><span class="co">#&gt; [1] "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/data_raw.parquet"</span></span></code></pre></div>
 <p>With several types, the computation is skipped only when
 <em>every</em> requested file already exists — otherwise the missing one
 would never be written.</p>
@@ -208,13 +244,13 @@ would never be written.</p>
 <p>A list is written as a folder of files rather than one large
 <code>.Rds</code>, so a single element can be read without loading the
 rest.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_split</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span><span class="va">data_raw</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">Condition</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/write_data.html">write_data</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"by_condition"</span>, dir <span class="op">=</span> <span class="va">dir</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Creating folder "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/by_condition.parquetlist". Done!</span></span>
-<span><span class="co">#&gt; Saving file "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/by_condition.parquetlist/ctrl.parquet". Done!</span></span>
-<span><span class="co">#&gt; Saving file "/tmp/RtmpiZmaQB/msArrow_intro1a6b2d2e0258/by_condition.parquetlist/t8.parquet". Done!</span></span>
+<span><span class="co">#&gt; Creating folder "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/by_condition.parquetlist". Done!</span></span>
+<span><span class="co">#&gt; Saving file "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/by_condition.parquetlist/ctrl.parquet". Done!</span></span>
+<span><span class="co">#&gt; Saving file "/tmp/RtmppHplHn/msArrow_intro1d644a2696d4/by_condition.parquetlist/t8.parquet". Done!</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">data_split</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "ctrl.parquet" "t8.parquet"</span></span>
@@ -229,6 +265,48 @@ rest.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Q9Y6K9        t8              6.4</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> O00305        t8             30.7</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> O00305        t8             29.9</span></span></code></pre></div>
+<p>Previewing one of these shows a single dataset by default, because
+there is more than one thing to show and <code><a href="../reference/view_data.html">view_data()</a></code> would
+otherwise open a viewer pane per element:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/preview_data.html">preview_data</a></span><span class="op">(</span><span class="va">data_split</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ctrl: Showing 3 of 6 rows</span></span>
+<span><span class="co">#&gt;   1 more dataset not shown - use n = c(3, 2) to show all</span></span>
+<span><span class="co">#&gt; $ctrl</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 3</span></span></span>
+<span><span class="co">#&gt;   Protein.Group Condition Intensity</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> P12345        ctrl           10.1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> P12345        ctrl           11.4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Q9Y6K9        ctrl            5.5</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; attr(,"total_sets")</span></span>
+<span><span class="co">#&gt; [1] 2</span></span></code></pre></div>
+<p>Give <code>n</code> a second number, <code>c(rows, datasets)</code>,
+to see more. The message names the call that would show everything, so
+it can be copied out of the console:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/preview_data.html">preview_data</a></span><span class="op">(</span><span class="va">data_split</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ctrl: Showing 3 of 6 rows</span></span>
+<span><span class="co">#&gt; t8: Showing 3 of 6 rows</span></span>
+<span><span class="co">#&gt; $ctrl</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 3</span></span></span>
+<span><span class="co">#&gt;   Protein.Group Condition Intensity</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> P12345        ctrl           10.1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> P12345        ctrl           11.4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Q9Y6K9        ctrl            5.5</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $t8</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 3</span></span></span>
+<span><span class="co">#&gt;   Protein.Group Condition Intensity</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> P12345        t8             15.2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> P12345        t8             14.8</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Q9Y6K9        t8              5.9</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; attr(,"total_sets")</span></span>
+<span><span class="co">#&gt; [1] 2</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="where-the-files-went">Where the files went<a class="anchor" aria-label="anchor" href="#where-the-files-went"></a>
@@ -236,17 +314,9 @@ rest.</p>
 <p>Without a <code>file</code> name, <code><a href="../reference/write_data.html">write_data()</a></code> writes
 into <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>. These helpers show what has accumulated and
 clear it:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="../reference/tempdir_list.html">tempdir_list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="next-steps">Next steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
-</h2>
-<p>For annotated datasets — variables, observations and long
-<code>observations x variables</code> frames kept together on disk, and
-DIA-NN reports imported straight into that layout — see <a href="https://nicohuttmann.github.io/msTools/" class="external-link">msTools</a>, which builds
-that store on top of the functions shown here.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -126,10 +126,29 @@
 <p><code><a href="reference/get_data.html">get_data()</a></code> already collects, so it never needs a trailing <code>collect()</code>.</p>
 </div>
 <div class="section level2">
+<h2 id="looking-at-a-file">Looking at a file<a class="anchor" aria-label="anchor" href="#looking-at-a-file"></a>
+</h2>
+<p><code><a href="reference/preview_data.html">preview_data()</a></code> reads only the first rows, so a file with millions of them can be inspected without loading it. The total comes from the file metadata, which costs nothing, so it can tell you what fraction you are looking at:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/preview_data.html">preview_data</a></span><span class="op">(</span><span class="st">"Data/data_curves.parquet"</span>, n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Showing 5 of 2,981,204 rows</span></span></code></pre></div>
+<p><code><a href="reference/view_data.html">view_data()</a></code> does the same and hands the result to the data viewer — RStudio’s own, so you keep column types, sorting and filtering — and reports afterwards, so the counts stay in the console once the pane is up:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/view_data.html">view_data</a></span><span class="op">(</span><span class="st">"Data/data_curves.parquet"</span><span class="op">)</span></span></code></pre></div>
+<p>Both return the preview, <code><a href="reference/view_data.html">view_data()</a></code> invisibly, and both attach the total as a <code>total_rows</code> attribute. Neither reads past the rows it shows: previewing a 2.5 M-row file takes about 0.1 s.</p>
+<p>A <code>.parquetlist</code> holds several datasets rather than one table. Only the first is shown by default; <code>n</code> takes a second number, <code>c(rows, datasets)</code>, and the message says what to pass to see the rest:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/view_data.html">view_data</a></span><span class="op">(</span><span class="st">"Data/by_group.parquetlist"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; controls: Showing 10 of 40 rows</span></span>
+<span><span class="co">#&gt;   3 more datasets not shown - use n = c(10, 4) to show all</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/view_data.html">view_data</a></span><span class="op">(</span><span class="st">"Data/by_group.parquetlist"</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="organising-datasets">Organising datasets<a class="anchor" aria-label="anchor" href="#organising-datasets"></a>
 </h2>
 <p>The dataset store — variables (precursors, peptides, proteins), observations (runs, samples) and long <code>observations x variables</code> data frames kept together on disk — lives in <a href="https://nicohuttmann.github.io/msTools/" class="external-link">msTools</a>, which is built on top of this package:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">msTools</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">import_diann</span><span class="op">(</span><span class="st">"report.parquet"</span>, name <span class="op">=</span> <span class="st">"Precursors"</span>, save_dir <span class="op">=</span> <span class="st">"Data/RData"</span><span class="op">)</span></span>
