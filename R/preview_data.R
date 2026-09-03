@@ -107,10 +107,14 @@ preview_data <- function(file,
 
 #' Opens the first rows of a file in the data viewer
 #'
-#' `view_data()` is [preview_data()] followed by `utils::View()`: the first <n>
-#' rows are collected without reading the rest of the file and handed to the
-#' viewer. The viewer is only called in an interactive session, and the preview
-#' is returned invisibly either way, so the same call is safe inside a script.
+#' `view_data()` is [preview_data()] followed by `View()`: the first <n> rows
+#' are collected without reading the rest of the file and handed to the viewer.
+#' The viewer is only called in an interactive session, and the preview is
+#' returned invisibly either way, so the same call is safe inside a script.
+#'
+#' `View()` is looked up on the search path rather than called as
+#' `utils::View()`, so an RStudio session gets RStudio's data viewer instead of
+#' base R's separate window.
 #'
 #' @inheritParams preview_data
 #' @param title title of the viewer tab (default: the file name)
@@ -168,12 +172,19 @@ view_data <- function(file,
   
   if (interactive()) {
     
+    # RStudio masks View() on the search path with its own data viewer. A 
+    # package namespace does not see that mask, and utils::View() is base R's 
+    # separate window, which formats every column to text. Looking the function 
+    # up from the global environment finds RStudio's viewer when there is one 
+    # and falls back to utils::View() everywhere else. 
+    view_fun <- get("View", envir = globalenv())
+    
     if (class(preview)[1] == "list") 
       purrr::iwalk(preview, 
-                   \(x, i) utils::View(x, title = paste(title, i, sep = ": ")))
+                   \(x, i) view_fun(x, paste(title, i, sep = ": ")))
     
     else 
-      utils::View(preview, title = title)
+      view_fun(preview, title)
     
   }
   

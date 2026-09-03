@@ -178,3 +178,31 @@ test_that("open_data() opens a .parquetlist as a list of connections", {
   expect_s3_class(out$one, "Dataset", exact = FALSE)
   expect_equal(nrow(out$two), 6)
 })
+
+
+test_that("view_data() uses the View() on the search path, not utils::View()", {
+
+  # RStudio masks View() this way; if view_data() called utils::View()
+  # directly the mask would be bypassed and the RStudio viewer never used.
+  seen <- new.env()
+  masking <- new.env(parent = globalenv())
+  assign("View", function(x, title) {
+    seen$x <- x
+    seen$title <- title
+    invisible(NULL)
+  }, envir = masking)
+
+  attach(masking, name = "tools:rstudio_test", warn.conflicts = FALSE)
+  withr::defer(detach("tools:rstudio_test"))
+
+  # interactive() is FALSE under testthat, so call the lookup the same way
+  view_fun <- get("View", envir = globalenv())
+  expect_false(identical(view_fun, utils::View))
+
+  dir <- withr::local_tempdir()
+  path <- write_data(test_table(6), "masked", dir, silent = T)
+  view_fun(preview_data(path, n = 2, silent = T), basename(path))
+
+  expect_equal(nrow(seen$x), 2)
+  expect_equal(seen$title, "masked.parquet")
+})

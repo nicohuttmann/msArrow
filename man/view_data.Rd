@@ -38,10 +38,15 @@ the previewed tibble (invisibly), or a named list of them for a
 \code{.parquetlist}
 }
 \description{
-\code{view_data()} is \code{\link[=preview_data]{preview_data()}} followed by \code{utils::View()}: the first \if{html}{\out{<n>}}
-rows are collected without reading the rest of the file and handed to the
-viewer. The viewer is only called in an interactive session, and the preview
-is returned invisibly either way, so the same call is safe inside a script.
+\code{view_data()} is \code{\link[=preview_data]{preview_data()}} followed by \code{View()}: the first \if{html}{\out{<n>}} rows
+are collected without reading the rest of the file and handed to the viewer.
+The viewer is only called in an interactive session, and the preview is
+returned invisibly either way, so the same call is safe inside a script.
+}
+\details{
+\code{View()} is looked up on the search path rather than called as
+\code{utils::View()}, so an RStudio session gets RStudio's data viewer instead of
+base R's separate window.
 }
 \examples{
   data_small <- tibble::tibble(a = 1:100, b = rnorm(100)) \%>\%
