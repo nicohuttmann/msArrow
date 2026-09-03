@@ -30,5 +30,5 @@ tempdir_remove(
 
 ``` r
   tempdir_remove()
-#> [1] TRUE
+#> [1] TRUE TRUE
 ```

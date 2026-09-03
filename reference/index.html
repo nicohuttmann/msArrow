@@ -69,6 +69,29 @@
         </dt>
         <dd>Combines a get_data(), map() and bind_rows()</dd>
       </dl></div><div class="section level2">
+      <h2 id="looking-at-a-file">Looking at a file<a class="anchor" aria-label="anchor" href="#looking-at-a-file"></a></h2>
+
+      <div class="section-desc"><p>Read the first rows of something large without loading it. Both report how many rows the file actually holds, which costs nothing to look up.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="preview_data.html">preview_data()</a></code>
+
+        </dt>
+        <dd>Reads the first rows of a file without loading the rest</dd>
+
+        <dt>
+
+          <code><a href="view_data.html">view_data()</a></code>
+
+        </dt>
+        <dd>Opens the first rows of a file in the data viewer</dd>
+      </dl></div><div class="section level2">
       <h2 id="temporary-files">Temporary files<a class="anchor" aria-label="anchor" href="#temporary-files"></a></h2>
 
       <div class="section-desc"><p><code><a href="../reference/write_data.html">write_data()</a></code> without a file name writes into <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>. These list, measure and clear what accumulated there.</p></div>
@@ -129,9 +152,9 @@
         </dt>
         <dd>Reads a folder of files back into a nested list</dd>
       </dl></div><div class="section level2">
-      <h2 id="datasets">Datasets<a class="anchor" aria-label="anchor" href="#datasets"></a></h2>
+      <h2 id="utilities">Utilities<a class="anchor" aria-label="anchor" href="#utilities"></a></h2>
 
-      <div class="section-desc"><p>The dataset store. A dataset is a folder holding variables, observations and any number of long <code>observations x variables</code> data frames. The registry lives in two objects in the global environment: <code>.Datasets</code> (paths) and <code>Datasets</code> (previews).</p></div>
+
 
       <dl></dl></div><div class="section level2">
 
@@ -139,319 +162,6 @@
 
 
       <dl><dt>
-
-          <code><a href="get_dataset.html">get_dataset()</a></code>
-
-        </dt>
-        <dd>Checks and returns correct dataset identifier</dd>
-
-        <dt>
-
-          <code><a href="get_dataset_names.html">get_dataset_names()</a></code>
-
-        </dt>
-        <dd>Prints or returns all dataset names</dd>
-
-        <dt>
-
-          <code><a href="dot-add_dataset.html">.add_dataset()</a></code>
-
-        </dt>
-        <dd>Registers a new dataset and creates its folder layout</dd>
-
-        <dt>
-
-          <code><a href="retag_datasets.html">retag_datasets()</a></code>
-
-        </dt>
-        <dd>Change name or copy data before saving the RData environment</dd>
-      </dl></div><div class="section level2">
-      <h2 id="variables">Variables<a class="anchor" aria-label="anchor" href="#variables"></a></h2>
-
-      <div class="section-desc"><p>Per-variable annotation (precursors, peptides, protein groups).</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="get_variables.html">get_variables()</a></code>
-
-        </dt>
-        <dd>Return variables</dd>
-
-        <dt>
-
-          <code><a href="get_variables_data.html">get_variables_data()</a></code>
-
-        </dt>
-        <dd>Return variables data</dd>
-
-        <dt>
-
-          <code><a href="get_variables_data_names.html">get_variables_data_names()</a></code>
-
-        </dt>
-        <dd>Returns variables data column names</dd>
-
-        <dt>
-
-          <code><a href="add_variables_data.html">add_variables_data()</a></code>
-
-        </dt>
-        <dd>Add variables data to data frame</dd>
-
-        <dt>
-
-          <code><a href="save_variables_data.html">save_variables_data()</a></code>
-
-        </dt>
-        <dd>Adds or updates variables data in a dataset</dd>
-
-        <dt>
-
-          <code><a href="dot-save_variables_data.html">.save_variables_data()</a></code>
-
-        </dt>
-        <dd>Writes the variables data of a dataset to disk</dd>
-      </dl></div><div class="section level2">
-      <h2 id="observations">Observations<a class="anchor" aria-label="anchor" href="#observations"></a></h2>
-
-      <div class="section-desc"><p>Per-observation annotation (runs, samples, conditions).</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="get_observations.html">get_observations()</a></code>
-
-        </dt>
-        <dd>Return observations</dd>
-
-        <dt>
-
-          <code><a href="get_observations_data.html">get_observations_data()</a></code>
-
-        </dt>
-        <dd>Return observations data</dd>
-
-        <dt>
-
-          <code><a href="get_observations_data_names.html">get_observations_data_names()</a></code>
-
-        </dt>
-        <dd>Returns observations data column names</dd>
-
-        <dt>
-
-          <code><a href="add_observations_data.html">add_observations_data()</a></code>
-
-        </dt>
-        <dd>Add observations data to data frame</dd>
-
-        <dt>
-
-          <code><a href="save_observations_data.html">save_observations_data()</a></code>
-
-        </dt>
-        <dd>Adds or updates observations data in a dataset</dd>
-
-        <dt>
-
-          <code><a href="dot-save_observations_data.html">.save_observations_data()</a></code>
-
-        </dt>
-        <dd>Writes the observations data of a dataset to disk</dd>
-      </dl></div><div class="section level2">
-      <h2 id="data-frames">Data frames<a class="anchor" aria-label="anchor" href="#data-frames"></a></h2>
-
-      <div class="section-desc"><p>The measured values themselves, stored long and read back on demand.</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="get_data_frame.html">get_data_frame()</a></code>
-
-        </dt>
-        <dd>Assemble data frame from dataset</dd>
-
-        <dt>
-
-          <code><a href="get_data_frame_names.html">get_data_frame_names()</a></code>
-
-        </dt>
-        <dd>Prints or returns data names</dd>
-
-        <dt>
-
-          <code><a href="open_data_frame.html">open_data_frame()</a></code>
-
-        </dt>
-        <dd>Assemble data frame from dataset</dd>
-
-        <dt>
-
-          <code><a href="save_data_frame.html">save_data_frame()</a></code>
-
-        </dt>
-        <dd>Saves a data frame into a dataset store</dd>
-
-        <dt>
-
-          <code><a href="dot-save_data_frame.html">.save_data_frame()</a></code>
-
-        </dt>
-        <dd>Writes a data frame of a dataset to disk</dd>
-      </dl></div><div class="section level2">
-      <h2 id="importing-dia-nn-reports">Importing DIA-NN reports<a class="anchor" aria-label="anchor" href="#importing-dia-nn-reports"></a></h2>
-
-      <div class="section-desc"><p>Turn a DIA-NN report straight into a dataset store, without ever holding the whole report in memory.</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="import_diann.html">import_diann()</a></code>
-
-        </dt>
-        <dd>Imports a DIA-NN report into a dataset store</dd>
-
-        <dt>
-
-          <code><a href="import_diann_channel.html">import_diann_channel()</a></code>
-
-        </dt>
-        <dd>Imports a channel-labelled (e.g. SILAC) DIA-NN report into a dataset store</dd>
-
-        <dt>
-
-          <code><a href="check_report.html">check_report()</a></code>
-
-        </dt>
-        <dd>Summarises a DIA-NN report without importing it</dd>
-
-        <dt>
-
-          <code><a href="dot-add_defaults.html">.add_defaults()</a></code>
-
-        </dt>
-        <dd>Registers the default column sets used by the DIA-NN importers</dd>
-
-        <dt>
-
-          <code><a href="dot-get_defaults.html">.get_defaults()</a></code>
-
-        </dt>
-        <dd>Returns a default column set used by the DIA-NN importers</dd>
-      </dl></div><div class="section level2">
-      <h2 id="string-helpers">String helpers<a class="anchor" aria-label="anchor" href="#string-helpers"></a></h2>
-
-      <div class="section-desc"><p>Splitting and locating inside identifiers such as <code>P12345_SEQ_1_20</code>.</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="strsplit_.html">strsplit_()</a></code>
-
-        </dt>
-        <dd>Same as strsplit but option to return as vector and to convert to numeric</dd>
-
-        <dt>
-
-          <code><a href="strsplit_keep.html">strsplit_keep()</a></code>
-
-        </dt>
-        <dd>Performs strsplit and keeps elements specified by vector</dd>
-
-        <dt>
-
-          <code><a href="strsplit_keep_first.html">strsplit_keep_first()</a></code>
-
-        </dt>
-        <dd>Performs strsplit and keeps first element of each string</dd>
-
-        <dt>
-
-          <code><a href="strsplit_keep_firstn.html">strsplit_keep_firstn()</a></code>
-
-        </dt>
-        <dd>Performs strsplit and keeps first n elements of each string</dd>
-
-        <dt>
-
-          <code><a href="strsplit_keep_last.html">strsplit_keep_last()</a></code>
-
-        </dt>
-        <dd>Performs strsplit and keeps first n elements of each string</dd>
-
-        <dt>
-
-          <code><a href="strsplit_keep_lastn.html">strsplit_keep_lastn()</a></code>
-
-        </dt>
-        <dd>Performs strsplit and keeps first n elements of each string</dd>
-
-        <dt>
-
-          <code><a href="str_rev.html">str_rev()</a></code>
-
-        </dt>
-        <dd>Returns given strings in reverse order</dd>
-
-        <dt>
-
-          <code><a href="str_locate_last.html">str_locate_last()</a></code>
-
-        </dt>
-        <dd>Locates last position of pattern in given string</dd>
-      </dl></div><div class="section level2">
-      <h2 id="small-tools">Small tools<a class="anchor" aria-label="anchor" href="#small-tools"></a></h2>
-
-      <div class="section-desc"><p>Short helpers used constantly in analysis code.</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="cc.html">cc()</a></code>
-
-        </dt>
-        <dd>Vector with elements as names</dd>
-
-        <dt>
-
-          <code><a href="fu.html">fu()</a></code>
-
-        </dt>
-        <dd>F(actors) U(nique)</dd>
-
-        <dt>
-
-          <code><a href="fus.html">fus()</a></code>
-
-        </dt>
-        <dd>F(actors) U(nique) S(orted)</dd>
-
-        <dt>
 
           <code><a href="cleanMem.html">cleanMem()</a></code>
 
@@ -460,89 +170,10 @@
 
         <dt>
 
-          <code><a href="cleanup.html">cleanup()</a></code>
-
-        </dt>
-        <dd>Remove objects from the global environment</dd>
-
-        <dt>
-
           <code><a href="pipe.html">`%&gt;%`</a></code>
 
         </dt>
         <dd>Pipe operator</dd>
-      </dl></div><div class="section level2">
-      <h2 id="code-writing-helpers">Code-writing helpers<a class="anchor" aria-label="anchor" href="#code-writing-helpers"></a></h2>
-
-      <div class="section-desc"><p>Print pasteable code snippets to the console. The <code>.cat_get_*</code> writers are interactive and prompt for a dataset and columns.</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="dot-cat_character.html">.cat_character()</a></code>
-
-        </dt>
-        <dd>Prints vectors to console in as character vector</dd>
-
-        <dt>
-
-          <code><a href="dot-cat_character_named.html">.cat_character_named()</a></code>
-
-        </dt>
-        <dd>Prints vectors to console in as character vector</dd>
-
-        <dt>
-
-          <code><a href="dot-cat_function.html">.cat_function()</a></code>
-
-        </dt>
-        <dd>Prints function snippet to console and clipboard</dd>
-
-        <dt>
-
-          <code><a href="dot-cat_get_data_frame.html">.cat_get_data_frame()</a></code>
-
-        </dt>
-        <dd>Writer function for get_data_frame</dd>
-
-        <dt>
-
-          <code><a href="dot-cat_get_data_frame_m.html">.cat_get_data_frame_m()</a></code>
-
-        </dt>
-        <dd>Writer function for get_data_frame</dd>
-
-        <dt>
-
-          <code><a href="dot-cat_get_observations_data.html">.cat_get_observations_data()</a></code>
-
-        </dt>
-        <dd>Writer function for get_observations_data</dd>
-
-        <dt>
-
-          <code><a href="dot-cat_get_variables_data.html">.cat_get_variables_data()</a></code>
-
-        </dt>
-        <dd>Writer function for get_variables_data</dd>
-
-        <dt>
-
-          <code><a href="dot-cat_gsub_n.html">.cat_gsub_n()</a></code>
-
-        </dt>
-        <dd>Substitutes pattern multiple times and prints output as code</dd>
-
-        <dt>
-
-          <code><a href="dot-cat_numeric.html">.cat_numeric()</a></code>
-
-        </dt>
-        <dd>Prints vectors to console in as character vector</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

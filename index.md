@@ -91,17 +91,24 @@ already collects, so it never needs a trailing `collect()`.
 
 ## Organising datasets
 
-The optional dataset store keeps variables (precursors, peptides,
-proteins), observations (runs, samples) and long
-`observations x variables` data frames together on disk:
+The dataset store — variables (precursors, peptides, proteins),
+observations (runs, samples) and long `observations x variables` data
+frames kept together on disk — lives in
+[msTools](https://nicohuttmann.github.io/msTools/), which is built on
+top of this package:
 
 ``` r
+
+library(msTools)
 
 import_diann("report.parquet", name = "Precursors", save_dir = "Data/RData")
 
 get_data_frame("Precursor.Normalised", dataset = "Precursors")
 get_variables_data("Genes", dataset = "Precursors")
 ```
+
+msArrow itself stays deliberately small: it is the on-disk I/O layer and
+nothing else.
 
 See
 [`vignette("msArrow")`](https://nicohuttmann.github.io/msArrow/articles/msArrow.md)

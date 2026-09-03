@@ -16,6 +16,16 @@ is deliberate memory management for large MS data.
 - [`get_data_m()`](https://nicohuttmann.github.io/msArrow/reference/get_data_m.md)
   : Combines a get_data(), map() and bind_rows()
 
+## Looking at a file
+
+Read the first rows of something large without loading it. Both report
+how many rows the file actually holds, which costs nothing to look up.
+
+- [`preview_data()`](https://nicohuttmann.github.io/msArrow/reference/preview_data.md)
+  : Reads the first rows of a file without loading the rest
+- [`view_data()`](https://nicohuttmann.github.io/msArrow/reference/view_data.md)
+  : Opens the first rows of a file in the data viewer
+
 ## Temporary files
 
 [`write_data()`](https://nicohuttmann.github.io/msArrow/reference/write_data.md)
@@ -42,148 +52,10 @@ large `.Rds`, so single elements can be read without loading the rest.
 - [`.read_objects_recursively()`](https://nicohuttmann.github.io/msArrow/reference/dot-read_objects_recursively.md)
   : Reads a folder of files back into a nested list
 
-## Datasets
+## Utilities
 
-The dataset store. A dataset is a folder holding variables, observations
-and any number of long `observations x variables` data frames. The
-registry lives in two objects in the global environment: `.Datasets`
-(paths) and `Datasets` (previews).
-
-- [`get_dataset()`](https://nicohuttmann.github.io/msArrow/reference/get_dataset.md)
-  : Checks and returns correct dataset identifier
-- [`get_dataset_names()`](https://nicohuttmann.github.io/msArrow/reference/get_dataset_names.md)
-  : Prints or returns all dataset names
-- [`.add_dataset()`](https://nicohuttmann.github.io/msArrow/reference/dot-add_dataset.md)
-  : Registers a new dataset and creates its folder layout
-- [`retag_datasets()`](https://nicohuttmann.github.io/msArrow/reference/retag_datasets.md)
-  : Change name or copy data before saving the RData environment
-
-## Variables
-
-Per-variable annotation (precursors, peptides, protein groups).
-
-- [`get_variables()`](https://nicohuttmann.github.io/msArrow/reference/get_variables.md)
-  : Return variables
-- [`get_variables_data()`](https://nicohuttmann.github.io/msArrow/reference/get_variables_data.md)
-  : Return variables data
-- [`get_variables_data_names()`](https://nicohuttmann.github.io/msArrow/reference/get_variables_data_names.md)
-  : Returns variables data column names
-- [`add_variables_data()`](https://nicohuttmann.github.io/msArrow/reference/add_variables_data.md)
-  : Add variables data to data frame
-- [`save_variables_data()`](https://nicohuttmann.github.io/msArrow/reference/save_variables_data.md)
-  : Adds or updates variables data in a dataset
-- [`.save_variables_data()`](https://nicohuttmann.github.io/msArrow/reference/dot-save_variables_data.md)
-  : Writes the variables data of a dataset to disk
-
-## Observations
-
-Per-observation annotation (runs, samples, conditions).
-
-- [`get_observations()`](https://nicohuttmann.github.io/msArrow/reference/get_observations.md)
-  : Return observations
-- [`get_observations_data()`](https://nicohuttmann.github.io/msArrow/reference/get_observations_data.md)
-  : Return observations data
-- [`get_observations_data_names()`](https://nicohuttmann.github.io/msArrow/reference/get_observations_data_names.md)
-  : Returns observations data column names
-- [`add_observations_data()`](https://nicohuttmann.github.io/msArrow/reference/add_observations_data.md)
-  : Add observations data to data frame
-- [`save_observations_data()`](https://nicohuttmann.github.io/msArrow/reference/save_observations_data.md)
-  : Adds or updates observations data in a dataset
-- [`.save_observations_data()`](https://nicohuttmann.github.io/msArrow/reference/dot-save_observations_data.md)
-  : Writes the observations data of a dataset to disk
-
-## Data frames
-
-The measured values themselves, stored long and read back on demand.
-
-- [`get_data_frame()`](https://nicohuttmann.github.io/msArrow/reference/get_data_frame.md)
-  : Assemble data frame from dataset
-- [`get_data_frame_names()`](https://nicohuttmann.github.io/msArrow/reference/get_data_frame_names.md)
-  : Prints or returns data names
-- [`open_data_frame()`](https://nicohuttmann.github.io/msArrow/reference/open_data_frame.md)
-  : Assemble data frame from dataset
-- [`save_data_frame()`](https://nicohuttmann.github.io/msArrow/reference/save_data_frame.md)
-  : Saves a data frame into a dataset store
-- [`.save_data_frame()`](https://nicohuttmann.github.io/msArrow/reference/dot-save_data_frame.md)
-  : Writes a data frame of a dataset to disk
-
-## Importing DIA-NN reports
-
-Turn a DIA-NN report straight into a dataset store, without ever holding
-the whole report in memory.
-
-- [`import_diann()`](https://nicohuttmann.github.io/msArrow/reference/import_diann.md)
-  : Imports a DIA-NN report into a dataset store
-- [`import_diann_channel()`](https://nicohuttmann.github.io/msArrow/reference/import_diann_channel.md)
-  : Imports a channel-labelled (e.g. SILAC) DIA-NN report into a dataset
-  store
-- [`check_report()`](https://nicohuttmann.github.io/msArrow/reference/check_report.md)
-  : Summarises a DIA-NN report without importing it
-- [`.add_defaults()`](https://nicohuttmann.github.io/msArrow/reference/dot-add_defaults.md)
-  : Registers the default column sets used by the DIA-NN importers
-- [`.get_defaults()`](https://nicohuttmann.github.io/msArrow/reference/dot-get_defaults.md)
-  : Returns a default column set used by the DIA-NN importers
-
-## String helpers
-
-Splitting and locating inside identifiers such as `P12345_SEQ_1_20`.
-
-- [`strsplit_()`](https://nicohuttmann.github.io/msArrow/reference/strsplit_.md)
-  : Same as strsplit but option to return as vector and to convert to
-  numeric
-- [`strsplit_keep()`](https://nicohuttmann.github.io/msArrow/reference/strsplit_keep.md)
-  : Performs strsplit and keeps elements specified by vector
-- [`strsplit_keep_first()`](https://nicohuttmann.github.io/msArrow/reference/strsplit_keep_first.md)
-  : Performs strsplit and keeps first element of each string
-- [`strsplit_keep_firstn()`](https://nicohuttmann.github.io/msArrow/reference/strsplit_keep_firstn.md)
-  : Performs strsplit and keeps first n elements of each string
-- [`strsplit_keep_last()`](https://nicohuttmann.github.io/msArrow/reference/strsplit_keep_last.md)
-  : Performs strsplit and keeps first n elements of each string
-- [`strsplit_keep_lastn()`](https://nicohuttmann.github.io/msArrow/reference/strsplit_keep_lastn.md)
-  : Performs strsplit and keeps first n elements of each string
-- [`str_rev()`](https://nicohuttmann.github.io/msArrow/reference/str_rev.md)
-  : Returns given strings in reverse order
-- [`str_locate_last()`](https://nicohuttmann.github.io/msArrow/reference/str_locate_last.md)
-  : Locates last position of pattern in given string
-
-## Small tools
-
-Short helpers used constantly in analysis code.
-
-- [`cc()`](https://nicohuttmann.github.io/msArrow/reference/cc.md) :
-  Vector with elements as names
-- [`fu()`](https://nicohuttmann.github.io/msArrow/reference/fu.md) :
-  F(actors) U(nique)
-- [`fus()`](https://nicohuttmann.github.io/msArrow/reference/fus.md) :
-  F(actors) U(nique) S(orted)
 - [`cleanMem()`](https://nicohuttmann.github.io/msArrow/reference/cleanMem.md)
   : Garbage collection function ruthlessly copied from
   https://stackoverflow.com/a/1467334
-- [`cleanup()`](https://nicohuttmann.github.io/msArrow/reference/cleanup.md)
-  : Remove objects from the global environment
 - [`` `%>%` ``](https://nicohuttmann.github.io/msArrow/reference/pipe.md)
   : Pipe operator
-
-## Code-writing helpers
-
-Print pasteable code snippets to the console. The `.cat_get_*` writers
-are interactive and prompt for a dataset and columns.
-
-- [`.cat_character()`](https://nicohuttmann.github.io/msArrow/reference/dot-cat_character.md)
-  : Prints vectors to console in as character vector
-- [`.cat_character_named()`](https://nicohuttmann.github.io/msArrow/reference/dot-cat_character_named.md)
-  : Prints vectors to console in as character vector
-- [`.cat_function()`](https://nicohuttmann.github.io/msArrow/reference/dot-cat_function.md)
-  : Prints function snippet to console and clipboard
-- [`.cat_get_data_frame()`](https://nicohuttmann.github.io/msArrow/reference/dot-cat_get_data_frame.md)
-  : Writer function for get_data_frame
-- [`.cat_get_data_frame_m()`](https://nicohuttmann.github.io/msArrow/reference/dot-cat_get_data_frame_m.md)
-  : Writer function for get_data_frame
-- [`.cat_get_observations_data()`](https://nicohuttmann.github.io/msArrow/reference/dot-cat_get_observations_data.md)
-  : Writer function for get_observations_data
-- [`.cat_get_variables_data()`](https://nicohuttmann.github.io/msArrow/reference/dot-cat_get_variables_data.md)
-  : Writer function for get_variables_data
-- [`.cat_gsub_n()`](https://nicohuttmann.github.io/msArrow/reference/dot-cat_gsub_n.md)
-  : Substitutes pattern multiple times and prints output as code
-- [`.cat_numeric()`](https://nicohuttmann.github.io/msArrow/reference/dot-cat_numeric.md)
-  : Prints vectors to console in as character vector

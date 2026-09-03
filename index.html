@@ -13,8 +13,8 @@
 <link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Wrapper for Arrow Functions to Handle Large (Proteomics) Data">
-<meta name="description" content="Convenient wrappers around some arrow functions for handling large mass spectrometry data, plus an opinionated way to organise datasets. Data are kept on disk as parquet or delimited files and referenced by path rather than held in memory.">
-<meta property="og:description" content="Convenient wrappers around some arrow functions for handling large mass spectrometry data, plus an opinionated way to organise datasets. Data are kept on disk as parquet or delimited files and referenced by path rather than held in memory.">
+<meta name="description" content="Convenient wrappers around some arrow functions for handling large mass spectrometry data. Data are kept on disk as parquet or delimited files and referenced by path rather than held in memory.">
+<meta property="og:description" content="Convenient wrappers around some arrow functions for handling large mass spectrometry data. Data are kept on disk as parquet or delimited files and referenced by path rather than held in memory.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -128,12 +128,15 @@
 <div class="section level2">
 <h2 id="organising-datasets">Organising datasets<a class="anchor" aria-label="anchor" href="#organising-datasets"></a>
 </h2>
-<p>The optional dataset store keeps variables (precursors, peptides, proteins), observations (runs, samples) and long <code>observations x variables</code> data frames together on disk:</p>
+<p>The dataset store — variables (precursors, peptides, proteins), observations (runs, samples) and long <code>observations x variables</code> data frames kept together on disk — lives in <a href="https://nicohuttmann.github.io/msTools/" class="external-link">msTools</a>, which is built on top of this package:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/import_diann.html">import_diann</a></span><span class="op">(</span><span class="st">"report.parquet"</span>, name <span class="op">=</span> <span class="st">"Precursors"</span>, save_dir <span class="op">=</span> <span class="st">"Data/RData"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">msTools</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="reference/get_data_frame.html">get_data_frame</a></span><span class="op">(</span><span class="st">"Precursor.Normalised"</span>, dataset <span class="op">=</span> <span class="st">"Precursors"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/get_variables_data.html">get_variables_data</a></span><span class="op">(</span><span class="st">"Genes"</span>, dataset <span class="op">=</span> <span class="st">"Precursors"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">import_diann</span><span class="op">(</span><span class="st">"report.parquet"</span>, name <span class="op">=</span> <span class="st">"Precursors"</span>, save_dir <span class="op">=</span> <span class="st">"Data/RData"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">get_data_frame</span><span class="op">(</span><span class="st">"Precursor.Normalised"</span>, dataset <span class="op">=</span> <span class="st">"Precursors"</span><span class="op">)</span></span>
+<span><span class="fu">get_variables_data</span><span class="op">(</span><span class="st">"Genes"</span>, dataset <span class="op">=</span> <span class="st">"Precursors"</span><span class="op">)</span></span></code></pre></div>
+<p>msArrow itself stays deliberately small: it is the on-disk I/O layer and nothing else.</p>
 <p>See <code><a href="articles/msArrow.html">vignette("msArrow")</a></code> for the whole workflow.</p>
 </div>
 </div>
