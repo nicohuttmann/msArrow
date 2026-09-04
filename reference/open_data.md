@@ -42,7 +42,7 @@ an Arrow dataset connection, or the object itself if is not a file path
     write_data(file = "data_small", 
                dir = tempdir(), 
                type = "tsv")
-#> Overwriting file "/tmp/Rtmpc8fqOe/data_small.tsv". Done!
+#> Overwriting file "/tmp/Rtmp5EiRY9/data_small.tsv". Done!
 
   open_data(data_small) %>%
     dplyr::filter(a > 1) %>%

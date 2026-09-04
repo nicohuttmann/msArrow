@@ -48,7 +48,107 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9"></main><aside class="col-md-3"><div class="links">
+  <main id="main" class="col-md-9"><div class="section level1">
+<div class="page-header"><h1 id="msarrow">msArrow<a class="anchor" aria-label="anchor" href="#msarrow"></a>
+</h1></div>
+<!-- badges: start -->
+
+<p>A minimal library to handle large (proteomics) data with R.</p>
+<p>In essence, this package contains convenient wrappers around some <code>arrow</code> and <code>nanoparquet</code> functions and an opinionated way to organize datasets. Latter aspect is not required to be used.</p>
+</div>
+<div class="section level1">
+<h1 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h1>
+<p>You can install this package from GitHub via:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"nicohuttmann/msArrow"</span><span class="op">)</span></span></code></pre></div>
+<p>or the new, fast way:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pkg_install.html" class="external-link">pkg_install</a></span><span class="op">(</span><span class="st">"nicohuttmann/msArrow"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level1">
+<h1 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+</h1>
+<p>Instead of storing your data in the R Environment which can be RAM-intensive, simply write your data to a temporary file, and load them each use.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nicohuttmann/msArrow" class="external-link">msArrow</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
+<span>    a <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1e8</span><span class="op">)</span>, </span>
+<span>    b <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1e8</span><span class="op">)</span>, </span>
+<span>    c <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1e8</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="reference/write_data.html">write_data</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/get_data.html">get_data</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
+<p>The variable holds a <strong>path</strong>, not the data. <code><a href="reference/write_data.html">write_data()</a></code> returns the file it wrote and every downstream step re-reads it, so nothing large sits in the session.</p>
+<div class="section level2">
+<h2 id="choosing-the-file-type">Choosing the file type<a class="anchor" aria-label="anchor" href="#choosing-the-file-type"></a>
+</h2>
+<p>By default <code><a href="reference/write_data.html">write_data()</a></code> picks the format itself: parquet for anything Arrow can represent, a <code>.parquetlist</code> folder for a list, <code>.Rds</code> otherwise. Give <code>type</code> to override that. It takes one or several of <code>parquet</code>, <code>rds</code>, <code>tsv</code>, <code>csv</code> and <code>txt</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">data_main</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_data.html">get_data</a></span><span class="op">(</span><span class="va">data_raw</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">summarise</span><span class="op">(</span>mean_int <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">Intensity</span><span class="op">)</span>, .by <span class="op">=</span> <span class="va">Protein.Group</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="reference/write_data.html">write_data</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"data_main"</span>, dir <span class="op">=</span> <span class="st">"Data"</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"parquet"</span>, <span class="st">"tsv"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>All requested files are written, but <strong>only the path of the first type is returned</strong> — so the pipeline stays on the parquet file while a readable <code>.tsv</code> lands next to it for collaborators. For a small table, <code>type = "tsv"</code> alone is usually what you want.</p>
+<p>If a series of data exports, say 100s of datasets, the <code>clean_memory = T</code> argument applies a cleanup of the RAM via the internal <code><a href="reference/cleanMem.html">cleanMem()</a></code> function. It’s worth using it if you feel your R session is becoming slower.</p>
+<p><code><a href="reference/get_data.html">get_data()</a></code> and <code><a href="reference/open_data.html">open_data()</a></code> read every one of these formats back, lazily too:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/open_data.html">open_data</a></span><span class="op">(</span><span class="st">"Data/data_main.tsv"</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">mean_int</span> <span class="op">&gt;</span> <span class="fl">10</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">collect</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="reading">Reading<a class="anchor" aria-label="anchor" href="#reading"></a>
+</h2>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr>
+<th></th>
+<th>returns</th>
+<th>use for</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>get_data(x)</code></td>
+<td>a materialised tibble</td>
+<td>you want the data now</td>
+</tr>
+<tr>
+<td><code>open_data(x)</code></td>
+<td>a lazy Arrow connection</td>
+<td>filter/aggregate before collecting</td>
+</tr>
+</tbody>
+</table>
+<p><code><a href="reference/get_data.html">get_data()</a></code> already collects, so it never needs a trailing <code>collect()</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="looking-at-a-file">Looking at a file<a class="anchor" aria-label="anchor" href="#looking-at-a-file"></a>
+</h2>
+<p><code><a href="reference/preview_data.html">preview_data()</a></code> reads only the first rows, so a file with millions of them can be inspected without loading it. The total comes from the file metadata, which costs nothing, so it can tell you what fraction you are looking at:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/preview_data.html">preview_data</a></span><span class="op">(</span><span class="st">"Data/data_curves.parquet"</span>, n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Showing 5 of 2,981,204 rows</span></span></code></pre></div>
+<p><code><a href="reference/view_data.html">view_data()</a></code> does the same and hands the result to the data viewer — RStudio’s own, so you keep column types, sorting and filtering — and reports afterwards, so the counts stay in the console once the pane is up:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/view_data.html">view_data</a></span><span class="op">(</span><span class="st">"Data/data_curves.parquet"</span><span class="op">)</span></span></code></pre></div>
+<p>Both return the preview, <code><a href="reference/view_data.html">view_data()</a></code> invisibly, and both attach the total as a <code>total_rows</code> attribute. Neither reads past the rows it shows: previewing a 2.5 M-row file takes about 0.1 s.</p>
+<p>A <code>.parquetlist</code> holds several datasets rather than one table. Only the first is shown by default; <code>n</code> takes a second number, <code>c(rows, datasets)</code>, and the message says what to pass to see the rest:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/view_data.html">view_data</a></span><span class="op">(</span><span class="st">"Data/by_group.parquetlist"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; controls: Showing 10 of 40 rows</span></span>
+<span><span class="co">#&gt;   3 more datasets not shown - use n = c(10, 4) to show all</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/view_data.html">view_data</a></span><span class="op">(</span><span class="st">"Data/by_group.parquetlist"</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>See <code><a href="articles/msArrow.html">vignette("msArrow")</a></code> for the whole workflow.</p>
+</div>
+</div>
+
+  </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
 <li><a href="https://github.com/nicohuttmann/msArrow/" class="external-link">Browse source code</a></li>
@@ -79,7 +179,13 @@
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/nicohuttmann/msArrow/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/nicohuttmann/msArrow/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://github.com/nicohuttmann/msArrow/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/nicohuttmann/msArrow/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>

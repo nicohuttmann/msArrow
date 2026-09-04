@@ -83,7 +83,7 @@ one by default.
     write_data(file = "data_small", 
                dir = tempdir(), 
                type = "parquet")
-#> Saving file "/tmp/Rtmpc8fqOe/data_small.parquet". Done!
+#> Saving file "/tmp/Rtmp5EiRY9/data_small.parquet". Done!
 
   view_data(data_small, n = 5)
 #> Showing 5 of 100 rows

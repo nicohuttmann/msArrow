@@ -37,10 +37,10 @@ data_raw <- tibble::tibble(
                      5.5,  6.1,  5.9,  6.4,
                     22.0, 21.3, 30.7, 29.9)) %>%
   write_data(file = "data_raw", dir = dir)
-#> Saving file "/tmp/RtmpJyXBWZ/msArrow_intro1b7a2f40eb09/data_raw.parquet". Done!
+#> Saving file "/tmp/Rtmpux1utj/msArrow_intro1a8034b7de8a/data_raw.parquet". Done!
 
 data_raw
-#> [1] "/tmp/RtmpJyXBWZ/msArrow_intro1b7a2f40eb09/data_raw.parquet"
+#> [1] "/tmp/Rtmpux1utj/msArrow_intro1a8034b7de8a/data_raw.parquet"
 ```
 
 The variable is a path. To use it, read it:
@@ -147,8 +147,8 @@ data_summary <- get_data(data_raw) %>%
             n        = n(),
             .by      = c(Protein.Group, Condition)) %>%
   write_data(file = "data_summary", dir = dir, type = c("parquet", "tsv"))
-#> Saving file "/tmp/RtmpJyXBWZ/msArrow_intro1b7a2f40eb09/data_summary.parquet". Done!
-#> Saving file "/tmp/RtmpJyXBWZ/msArrow_intro1b7a2f40eb09/data_summary.tsv". Done!
+#> Saving file "/tmp/Rtmpux1utj/msArrow_intro1a8034b7de8a/data_summary.parquet". Done!
+#> Saving file "/tmp/Rtmpux1utj/msArrow_intro1a8034b7de8a/data_summary.tsv". Done!
 
 list.files(dir, pattern = "data_summary")
 #> [1] "data_summary.parquet" "data_summary.tsv"
@@ -173,7 +173,7 @@ get_data(data_raw) %>%
   distinct(Protein.Group) %>%
   write_data(file = "protein_list", dir = dir, type = "tsv") %>%
   get_data()
-#> Saving file "/tmp/RtmpJyXBWZ/msArrow_intro1b7a2f40eb09/protein_list.tsv". Done!
+#> Saving file "/tmp/Rtmpux1utj/msArrow_intro1a8034b7de8a/protein_list.tsv". Done!
 #> # A tibble: 3 × 1
 #>   Protein.Group
 #>   <chr>        
@@ -191,7 +191,7 @@ containing a tab or comma still round-trips:
 tibble::tibble(Genes = c("A,B", "C\tD"), n = 1:2) %>%
   write_data(file = "tricky", dir = dir, type = "tsv") %>%
   get_data()
-#> Saving file "/tmp/RtmpJyXBWZ/msArrow_intro1b7a2f40eb09/tricky.tsv". Done!
+#> Saving file "/tmp/Rtmpux1utj/msArrow_intro1a8034b7de8a/tricky.tsv". Done!
 #> # A tibble: 2 × 2
 #>   Genes      n
 #>   <chr>  <int>
@@ -213,8 +213,8 @@ have not changed:
 ``` r
 
 write_data(get_data(data_raw), file = "data_raw", dir = dir, redo = FALSE)
-#> Returning location of existing file "/tmp/RtmpJyXBWZ/msArrow_intro1b7a2f40eb09/data_raw.parquet".
-#> [1] "/tmp/RtmpJyXBWZ/msArrow_intro1b7a2f40eb09/data_raw.parquet"
+#> Returning location of existing file "/tmp/Rtmpux1utj/msArrow_intro1a8034b7de8a/data_raw.parquet".
+#> [1] "/tmp/Rtmpux1utj/msArrow_intro1a8034b7de8a/data_raw.parquet"
 ```
 
 With several types, the computation is skipped only when *every*
@@ -231,9 +231,9 @@ a single element can be read without loading the rest.
 data_split <- get_data(data_raw) %>%
   split(.$Condition) %>%
   write_data(file = "by_condition", dir = dir)
-#> Creating folder "/tmp/RtmpJyXBWZ/msArrow_intro1b7a2f40eb09/by_condition.parquetlist". Done!
-#> Saving file "/tmp/RtmpJyXBWZ/msArrow_intro1b7a2f40eb09/by_condition.parquetlist/ctrl.parquet". Done!
-#> Saving file "/tmp/RtmpJyXBWZ/msArrow_intro1b7a2f40eb09/by_condition.parquetlist/t8.parquet". Done!
+#> Creating folder "/tmp/Rtmpux1utj/msArrow_intro1a8034b7de8a/by_condition.parquetlist". Done!
+#> Saving file "/tmp/Rtmpux1utj/msArrow_intro1a8034b7de8a/by_condition.parquetlist/ctrl.parquet". Done!
+#> Saving file "/tmp/Rtmpux1utj/msArrow_intro1a8034b7de8a/by_condition.parquetlist/t8.parquet". Done!
 
 list.files(data_split)
 #> [1] "ctrl.parquet" "t8.parquet"
