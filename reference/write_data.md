@@ -86,9 +86,15 @@ types were written
 
 ## Details
 
-Giving one or several file types via overrides this automatic choice.
-Tables can be written as "parquet", "rds", "tsv", "csv" or "txt";
-delimited files are written with
+A name that already ends in a recognised type keeps it:
+`write_data(x, "data.tsv")` writes `data.tsv`, not `data.tsv.parquet`,
+and the ending decides the format. Only the real types count, so
+`data_2024.01` and `v1.5` keep their endings and get one appended as
+usual.
+
+Giving one or several file types via overrides both the automatic choice
+and the ending in the name. Tables can be written as "parquet", "rds",
+"tsv", "csv" or "txt"; delimited files are written with
 [`arrow::write_csv_arrow()`](https://arrow.apache.org/docs/r/reference/write_csv_arrow.html)
 and ".txt" is tab-separated. When several types are given, all files are
 written but only the path of the first type is returned, so
@@ -102,8 +108,8 @@ the pipeline on the parquet file and drops a readable .tsv next to it.
     write_data(file = "data_small", 
                dir = tempdir(), 
                type = c("parquet", "tsv"))
-#> Overwriting file "/tmp/Rtmp5EiRY9/data_small.parquet". Done!
-#> Saving file "/tmp/Rtmp5EiRY9/data_small.tsv". Done!
+#> Overwriting file "/tmp/RtmpMtK5I7/data_small.parquet". Done!
+#> Saving file "/tmp/RtmpMtK5I7/data_small.tsv". Done!
 
   get_data(data_small)
 #> # A tibble: 3 × 2

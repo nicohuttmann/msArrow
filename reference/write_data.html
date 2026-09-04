@@ -128,7 +128,11 @@ given <type>, so format-specific arguments only work with a single type</type></
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Giving one or several file types via <type> overrides this automatic choice.
+    <p>A name that already ends in a recognised type keeps it: <code>write_data(x, "data.tsv")</code> writes <code>data.tsv</code>, not <code>data.tsv.parquet</code>, and the ending
+decides the format. Only the real types count, so <code>data_2024.01</code> and <code>v1.5</code>
+keep their endings and get one appended as usual.</p>
+<p>Giving one or several file types via <type> overrides both the automatic
+choice and the ending in the name.
 Tables can be written as "parquet", "rds", "tsv", "csv" or "txt"; delimited
 files are written with <code><a href="https://arrow.apache.org/docs/r/reference/write_csv_arrow.html" class="external-link">arrow::write_csv_arrow()</a></code> and ".txt" is
 tab-separated. When several types are given, all files are written but only
@@ -143,8 +147,8 @@ pipeline on the parquet file and drops a readable .tsv next to it.</type></p>
 <span class="r-in"><span>    <span class="fu">write_data</span><span class="op">(</span>file <span class="op">=</span> <span class="st">"data_small"</span>, </span></span>
 <span class="r-in"><span>               dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>               type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"parquet"</span>, <span class="st">"tsv"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Overwriting file "/tmp/Rtmp5EiRY9/data_small.parquet". Done!</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Saving file "/tmp/Rtmp5EiRY9/data_small.tsv". Done!</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Overwriting file "/tmp/RtmpMtK5I7/data_small.parquet". Done!</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Saving file "/tmp/RtmpMtK5I7/data_small.tsv". Done!</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="get_data.html">get_data</a></span><span class="op">(</span><span class="va">data_small</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 2</span></span>
