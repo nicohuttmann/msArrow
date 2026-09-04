@@ -254,3 +254,81 @@ test_that("write_data() reports each file it writes when not silent", {
                 "loud\\.parquet")
   expect_output(write_data(test_table(), "loud2", dir, type = "tsv"), "Done!")
 })
+
+
+test_that("a name that already carries a type is not given a second one", {
+
+  dir <- withr::local_tempdir()
+  d <- test_table()
+
+  for (ty in c("parquet", "tsv", "csv", "txt", "Rds")) {
+    nm <- paste0("keep.", ty)
+    expect_equal(basename(write_data(d, nm, dir, silent = T)), nm, info = ty)
+  }
+})
+
+
+test_that("the ending in the name decides the format written", {
+
+  dir <- withr::local_tempdir()
+  d <- test_table()
+
+  # a .tsv named file really is tab-separated, not parquet under a tsv name
+  write_data(d, "fmt.tsv", dir, silent = T)
+  expect_match(readLines(file.path(dir, "fmt.tsv"), n = 1), "\t")
+
+  write_data(d, "fmt.csv", dir, silent = T)
+  expect_match(readLines(file.path(dir, "fmt.csv"), n = 1), ",")
+
+  # and each round-trips
+  for (nm in c("fmt.tsv", "fmt.csv")) {
+    expect_equal(get_data(file.path(dir, nm)), d, info = nm)
+  }
+})
+
+
+test_that("an explicit <type> still overrides the ending in the name", {
+
+  dir <- withr::local_tempdir()
+
+  expect_equal(basename(write_data(test_table(), "over.parquet", dir,
+                                   type = "tsv", silent = T)),
+               "over.tsv")
+})
+
+
+test_that("the ending is kept exactly as written", {
+
+  dir <- withr::local_tempdir()
+
+  expect_equal(basename(write_data(test_table(), "case.TSV", dir, silent = T)),
+               "case.TSV")
+  expect_equal(basename(write_data(test_table(), "case.PARQUET", dir,
+                                   silent = T)),
+               "case.PARQUET")
+})
+
+
+test_that("a .parquetlist name is not doubled", {
+
+  dir <- withr::local_tempdir()
+
+  path <- write_data(list(a = test_table()), "pl.parquetlist", dir, silent = T)
+
+  expect_equal(basename(path), "pl.parquetlist")
+  expect_named(get_data(path), "a")
+})
+
+
+test_that("a dot that is not a file type is left alone", {
+
+  dir <- withr::local_tempdir()
+  d <- test_table()
+
+  expect_equal(basename(write_data(d, "data_2024.01", dir, silent = T)),
+               "data_2024.01.parquet")
+  expect_equal(basename(write_data(d, "v1.5", dir, silent = T)),
+               "v1.5.parquet")
+  expect_equal(basename(write_data(d, "report.final", dir, silent = T)),
+               "report.final.parquet")
+})

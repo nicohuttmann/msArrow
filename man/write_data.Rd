@@ -60,7 +60,12 @@ arguments \code{arrow::write_parquet()}, \code{arrow::write_dataset()} or R's na
 \code{saveRDS()} will be used. If redo = F, the function checks if the computation can be skipped.
 }
 \details{
-Giving one or several file types via \if{html}{\out{<type>}} overrides this automatic choice.
+A name that already ends in a recognised type keeps it: \code{write_data(x, "data.tsv")} writes \code{data.tsv}, not \code{data.tsv.parquet}, and the ending
+decides the format. Only the real types count, so \code{data_2024.01} and \code{v1.5}
+keep their endings and get one appended as usual.
+
+Giving one or several file types via \if{html}{\out{<type>}} overrides both the automatic
+choice and the ending in the name.
 Tables can be written as "parquet", "rds", "tsv", "csv" or "txt"; delimited
 files are written with \code{arrow::write_csv_arrow()} and ".txt" is
 tab-separated. When several types are given, all files are written but only

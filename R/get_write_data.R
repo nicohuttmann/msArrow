@@ -1,5 +1,28 @@
 .types_allowed <- c("parquet", "rds", "tsv", "csv", "txt")
 
+# the endings write_data() recognises in a file name, list folder included
+.types_in_name <- c(.types_allowed, "parquetlist")
+
+
+#' Returns the file type a name already carries
+#'
+#' Only the recognised endings count, so a file called "data_2024.01" or
+#' "v1.5" keeps its ending instead of losing it to `file_path_sans_ext()`.
+#' The match ignores case, so ".TSV" is a tsv.
+#'
+#' @param file_dir file path
+#'
+#' @returns the type in lower case, or NA if the name carries none
+#' @keywords internal
+.type_in_name <- function(file_dir) {
+  
+  ext <- tolower(tools::file_ext(file_dir))
+  
+  if (length(ext) == 1 && ext %in% .types_in_name) ext 
+  else NA_character_
+  
+}
+
 
 #' Checks file types given to write_data()
 #'
@@ -49,7 +72,7 @@
 #' @returns file path without a trailing known file type ending
 #' @keywords internal
 .trim_data_type <- function(file_dir) {
-  ifelse(tolower(tools::file_ext(file_dir)) %in% .types_allowed, 
+  ifelse(tolower(tools::file_ext(file_dir)) %in% .types_in_name, 
          tools::file_path_sans_ext(file_dir), 
          file_dir)
 }
@@ -63,9 +86,17 @@
 #' @returns file paths, one per given type
 #' @keywords internal
 .add_data_type <- function(file_dir, type) {
-  paste0(.trim_data_type(file_dir), 
-         ".", 
-         ifelse(type == "rds", "Rds", type))
+  
+  # a name that already ends in the wanted type is kept exactly as given, so
+  # "data.TSV" stays "data.TSV" rather than being renamed to "data.tsv"
+  vapply(type, 
+         \(ty) if (identical(tolower(tools::file_ext(file_dir)), ty)) file_dir 
+               else paste0(.trim_data_type(file_dir), 
+                           ".", 
+                           if (ty == "rds") "Rds" else ty), 
+         character(1), 
+         USE.NAMES = F)
+  
 }
 
 
@@ -160,7 +191,13 @@
 #' arguments `arrow::write_parquet()`, `arrow::write_dataset()` or R's native 
 #' `saveRDS()` will be used. If redo = F, the function checks if the computation can be skipped.
 #'
-#' Giving one or several file types via <type> overrides this automatic choice.
+#' A name that already ends in a recognised type keeps it: `write_data(x,
+#' "data.tsv")` writes `data.tsv`, not `data.tsv.parquet`, and the ending
+#' decides the format. Only the real types count, so `data_2024.01` and `v1.5`
+#' keep their endings and get one appended as usual.
+#'
+#' Giving one or several file types via <type> overrides both the automatic
+#' choice and the ending in the name.
 #' Tables can be written as "parquet", "rds", "tsv", "csv" or "txt"; delimited
 #' files are written with `arrow::write_csv_arrow()` and ".txt" is
 #' tab-separated. When several types are given, all files are written but only
@@ -224,6 +261,18 @@ write_data <- function(x,
   # Check given file types
   if (hasArg(type)) type <- .check_data_type(type)
   else type <- NULL
+
+  # A recognised ending in <file> says what to write, so that nothing is
+  # appended to a name that already carries a type. An explicit <type> still
+  # wins - write_data(x, "a.parquet", type = "tsv") writes a.tsv.
+  if (is.null(type)) {
+
+    named_type <- .type_in_name(file_dir)
+
+    if (!is.na(named_type) && named_type != "parquetlist")
+      type <- named_type
+
+  }
   
   
   # Check if x should be run or simply save the location
@@ -274,7 +323,8 @@ write_data <- function(x,
              call. = F)
       
       .save_objects_recursively(object = x, 
-                                name = paste0(file, ".parquetlist"), 
+                                name = paste0(.trim_data_type(file), 
+                                              ".parquetlist"), 
                                 dir = dir, 
                                 type = type, 
                                 silent = silent, 
@@ -284,7 +334,7 @@ write_data <- function(x,
                                 partitioning = partitioning, 
                                 ...)
       
-      file_dir <- paste0(file_dir, ".parquetlist")
+      file_dir <- paste0(.trim_data_type(file_dir), ".parquetlist")
       
       # Save table as every given file type
     } else {
@@ -328,7 +378,8 @@ write_data <- function(x,
     } else if (class(x)[1] == "list" && list_as_folders) {
       
       .save_objects_recursively(object = x, 
-                                name = paste0(file, ".parquetlist"), 
+                                name = paste0(.trim_data_type(file), 
+                                              ".parquetlist"), 
                                 dir = dir, 
                                 silent = silent, 
                                 redo = redo, 
@@ -337,7 +388,7 @@ write_data <- function(x,
                                 partitioning = partitioning, 
                                 ...)
       
-      file_dir <- paste0(file_dir, ".parquetlist")
+      file_dir <- paste0(.trim_data_type(file_dir), ".parquetlist")
       
       # Save as Rds file
     } else {

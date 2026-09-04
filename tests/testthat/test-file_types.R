@@ -70,3 +70,31 @@ test_that(".write_data_file() notes that partitioning is ignored for delimited",
                                            partitioning = "Genes"),
                 "<partitioning> ignored", fixed = TRUE)
 })
+
+
+test_that(".type_in_name() matches only the recognised endings", {
+
+  expect_equal(msArrow:::.type_in_name("a/b.parquet"), "parquet")
+  expect_equal(msArrow:::.type_in_name("a/b.tsv"), "tsv")
+  expect_equal(msArrow:::.type_in_name("a/b.Rds"), "rds")
+  expect_equal(msArrow:::.type_in_name("a/b.TSV"), "tsv")
+  expect_equal(msArrow:::.type_in_name("a/b.parquetlist"), "parquetlist")
+
+  # a dot that is not a file type
+  expect_true(is.na(msArrow:::.type_in_name("data_2024.01")))
+  expect_true(is.na(msArrow:::.type_in_name("v1.5")))
+  expect_true(is.na(msArrow:::.type_in_name("report.final")))
+  expect_true(is.na(msArrow:::.type_in_name("plain")))
+})
+
+
+test_that(".add_data_type() keeps an ending that is already the wanted type", {
+
+  expect_equal(msArrow:::.add_data_type("a.tsv", "tsv"), "a.tsv")
+  expect_equal(msArrow:::.add_data_type("a.TSV", "tsv"), "a.TSV")
+  expect_equal(msArrow:::.add_data_type("a.rds", "rds"), "a.rds")
+
+  # a different type replaces it
+  expect_equal(msArrow:::.add_data_type("a.tsv", "parquet"), "a.parquet")
+  expect_equal(msArrow:::.add_data_type("a.parquetlist", "tsv"), "a.tsv")
+})
