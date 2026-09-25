@@ -456,6 +456,14 @@ get_data <- function(file,
     
   }
   
+  # Check for preview tibbles 
+  if (tibble::is_tibble(file) && 
+      exists(paste0(".", deparse(substitute(file)))) && 
+      is.character(get(paste0(".", deparse(substitute(file))))) && 
+      file.exists(get(paste0(".", deparse(substitute(file)))))[1])
+      file <- get(paste0(".", deparse(substitute(file))))
+  
+  # Decide what to do with file 
   if (length(file) > 1) {
     
     return(file)
@@ -912,3 +920,4 @@ load_objects <- function(dir = "",
   }
   
 }
+

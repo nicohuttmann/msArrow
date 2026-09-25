@@ -270,3 +270,29 @@ view_data <- function(file,
   return(invisible(preview))
 
 }
+
+
+#' Substitutes the given data frame with a preview, saves the data locally and 
+#' stores the location in a hidden variable
+#'
+#' @param x 
+#' @param n number of rows to retain in the preview 
+#' @param clean_memory 
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+create_preview <- function(x, n = 10, clean_memory = T) {
+  
+  .x <- deparse(substitute(x))
+  
+  assign(x = paste0(".", deparse(substitute(x))), 
+         value = write_data(x), 
+         envir = globalenv())
+  
+  if (!isFALSE(clean_memory)) cleanMem(clean_memory)
+  
+  return(preview_data(x, silent = T))
+  
+}
