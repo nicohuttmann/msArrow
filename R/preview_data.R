@@ -288,7 +288,7 @@ create_preview <- function(x, n = 10, clean_memory = T) {
   .x <- deparse(substitute(x))
   
   assign(x = paste0(".", deparse(substitute(x))), 
-         value = write_data(x), 
+         value = write_data(open_data(x)), 
          envir = globalenv())
   
   if (!isFALSE(clean_memory)) cleanMem(clean_memory)

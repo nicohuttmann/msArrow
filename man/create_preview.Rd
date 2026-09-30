@@ -7,6 +7,9 @@ stores the location in a hidden variable}
 \usage{
 create_preview(x, n = 10, clean_memory = T)
 }
+\arguments{
+\item{n}{number of rows to retain in the preview}
+}
 \description{
 Substitutes the given data frame with a preview, saves the data locally and
 stores the location in a hidden variable
