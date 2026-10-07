@@ -91,9 +91,9 @@
   # "data.TSV" stays "data.TSV" rather than being renamed to "data.tsv"
   vapply(type, 
          \(ty) if (identical(tolower(tools::file_ext(file_dir)), ty)) file_dir 
-               else paste0(.trim_data_type(file_dir), 
-                           ".", 
-                           if (ty == "rds") "Rds" else ty), 
+         else paste0(.trim_data_type(file_dir), 
+                     ".", 
+                     if (ty == "rds") "Rds" else ty), 
          character(1), 
          USE.NAMES = F)
   
@@ -261,17 +261,17 @@ write_data <- function(x,
   # Check given file types
   if (hasArg(type)) type <- .check_data_type(type)
   else type <- NULL
-
+  
   # A recognised ending in <file> says what to write, so that nothing is
   # appended to a name that already carries a type. An explicit <type> still
   # wins - write_data(x, "a.parquet", type = "tsv") writes a.tsv.
   if (is.null(type)) {
-
+    
     named_type <- .type_in_name(file_dir)
-
+    
     if (!is.na(named_type) && named_type != "parquetlist")
       type <- named_type
-
+    
   }
   
   
@@ -457,11 +457,20 @@ get_data <- function(file,
   }
   
   # Check for preview tibbles 
+  .file1 <- paste0(".", deparse(substitute(file)))[1]
+  .file2 <- paste0(".", .the_lhs())[1]
+  
   if (tibble::is_tibble(file) && 
-      exists(paste0(".", deparse(substitute(file)))) && 
-      is.character(get(paste0(".", deparse(substitute(file))))) && 
-      file.exists(get(paste0(".", deparse(substitute(file)))))[1])
-      file <- get(paste0(".", deparse(substitute(file))))
+      exists(.file1) && 
+      is.character(get(.file1)) && 
+      file.exists(get(.file1)))
+    file <- get(.file1)
+  else if (tibble::is_tibble(file) && 
+           exists(.file2) && 
+           is.character(get(.file2)) && 
+           file.exists(get(.file2)))
+    file <- get(.file2)
+  
   
   # Decide what to do with file 
   if (length(file) > 1) {
@@ -584,12 +593,12 @@ open_data <- function(file,
       else data_object <- file
       
     } else if (tolower(tools::file_ext(file)) == "parquetlist") {
-
+      
       data_object <- .read_objects_recursively(name = file, 
                                                silent = T, 
                                                as_arrow_table = T, 
                                                ...)
-
+      
     }  else if (tolower(tools::file_ext(file)) == "rds") {
       
       if (recursive) data_object <- readRDS(file) %>%
@@ -709,7 +718,7 @@ tempdir_remove <- function(dir = tempdir(),
 #' @param silent Should messages be suppressed?
 #' @param redo Should existing files be written again?
 #' @param list_as_folders Should nested lists become nested folders?
-#' @param clean_memory Should the memory be cleaned with gc()/cleanMem() afer
+#' @param clean_memory Should the memory be cleaned with gc()/cleanMem() after
 #' writing
 #' @param partitioning Should the parquet files be split into
 #' @param ... additional arguments for the saving function

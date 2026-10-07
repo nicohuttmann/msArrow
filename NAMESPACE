@@ -3,6 +3,7 @@
 export("%>%")
 export(.read_objects_recursively)
 export(.save_objects_recursively)
+export(.the_lhs)
 export(cleanMem)
 export(create_preview)
 export(get_data)
