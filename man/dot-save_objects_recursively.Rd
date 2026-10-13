@@ -32,7 +32,7 @@
 
 \item{list_as_folders}{Should nested lists become nested folders?}
 
-\item{clean_memory}{Should the memory be cleaned with gc()/cleanMem() afer
+\item{clean_memory}{Should the memory be cleaned with gc()/cleanMem() after
 writing}
 
 \item{partitioning}{Should the parquet files be split into}
