@@ -6,20 +6,20 @@
 #' @returns a tibble of the first <n> rows carrying a `total_rows` attribute
 #' @keywords internal
 .preview_one <- function(x, n) {
-
+  
   # nrow() reads the metadata only, so this stays free even for a huge dataset
   total_rows <- tryCatch(nrow(x), error = function(e) NA_integer_)
-
+  
   if (is.null(total_rows) || length(total_rows) != 1) total_rows <- NA_integer_
-
+  
   preview <- x %>%
     dplyr::slice_head(n = n) %>%
     dplyr::collect()
-
+  
   attr(preview, "total_rows") <- total_rows
-
+  
   return(preview)
-
+  
 }
 
 
@@ -49,9 +49,9 @@
 .preview_message <- function(previews, 
                              n_rows, 
                              total_sets = NULL) {
-
+  
   fmt <- function(x) if (is.na(x)) "?" else format(x, big.mark = ",")
-
+  
   line <- function(preview, label = NULL)
     cat(paste0(if (is.null(label)) "" else paste0(label, ": "), 
                "Showing ", 
@@ -59,18 +59,18 @@
                " of ", 
                fmt(attr(preview, "total_rows")), 
                " rows\n"))
-
+  
   if (inherits(previews, "data.frame")) {
-
+    
     line(previews)
-
+    
   } else {
-
+    
     purrr::iwalk(previews, \(x, i) line(x, label = i))
-
+    
     # a .parquetlist holds several datasets and only the first are shown
     n_hidden <- if (is.null(total_sets)) 0 else total_sets - length(previews)
-
+    
     if (n_hidden > 0)
       cat(paste0("  ", 
                  n_hidden, 
@@ -81,11 +81,11 @@
                  ", ", 
                  total_sets, 
                  ") to show all\n"))
-
+    
   }
-
+  
   return(invisible(NULL))
-
+  
 }
 
 
@@ -130,9 +130,28 @@ preview_data <- function(file,
                          credit = 10, 
                          silent = F, 
                          ...) {
-
+  
   n <- .preview_n(n)
-
+  
+  # Check for preview tibbles 
+  .file1 <- paste0(".", deparse(substitute(file)))[1]
+  .file2 <- paste0(".", .the_lhs())[1]
+  
+  if (tibble::is_tibble(file) && 
+      exists(.file1) && 
+      is.character(get(.file1)) && 
+      file.exists(get(.file1))) {
+    file <- get(.file1)
+    n$rows <- Inf
+  }
+  else if (tibble::is_tibble(file) && 
+           exists(.file2) && 
+           is.character(get(.file2)) && 
+           file.exists(get(.file2))) {
+    file <- get(.file2)
+    n$rows <- Inf
+  }
+  
   # <fallback> is forwarded only when given, so that open_data() can still
   # report a missing input itself instead of failing on an empty promise
   if (hasArg(fallback))
@@ -141,37 +160,37 @@ preview_data <- function(file,
                              recursive = recursive, 
                              credit = credit, 
                              ...)
-
+  
   else
     data_object <- open_data(file = file, 
                              recursive = recursive, 
                              credit = credit, 
                              ...)
-
+  
   # a .parquetlist opens as a named list of connections
   if (class(data_object)[1] == "list") {
-
+    
     total_sets <- length(data_object)
-
+    
     previews <- utils::head(data_object, n$sets) %>%
       purrr::map(\(x) .preview_one(x, n = n$rows))
-
+    
     attr(previews, "total_sets") <- total_sets
-
+    
     if (!silent) .preview_message(previews, 
                                   n_rows = n$rows, 
                                   total_sets = total_sets)
-
+    
     return(previews)
-
+    
   }
-
+  
   preview <- .preview_one(data_object, n = n$rows)
-
+  
   if (!silent) .preview_message(preview, n_rows = n$rows)
-
+  
   return(preview)
-
+  
 }
 
 
@@ -212,7 +231,26 @@ view_data <- function(file,
                       title, 
                       silent = F, 
                       ...) {
-
+  
+  # Check for preview tibbles 
+  .file1 <- paste0(".", deparse(substitute(file)))[1]
+  .file2 <- paste0(".", .the_lhs())[1]
+  
+  if (tibble::is_tibble(file) && 
+      exists(.file1) && 
+      is.character(get(.file1)) && 
+      file.exists(get(.file1))) {
+    file <- get(.file1)
+    n <- Inf
+  }
+  else if (tibble::is_tibble(file) && 
+           exists(.file2) && 
+           is.character(get(.file2)) && 
+           file.exists(get(.file2))) {
+    file <- get(.file2)
+    n <- Inf
+  }
+  
   # the preview is built quietly so that the viewer opens before the message
   if (hasArg(fallback))
     preview <- preview_data(file = file, 
@@ -222,7 +260,7 @@ view_data <- function(file,
                             credit = credit, 
                             silent = T, 
                             ...)
-
+  
   else
     preview <- preview_data(file = file, 
                             n = n, 
@@ -230,45 +268,45 @@ view_data <- function(file,
                             credit = credit, 
                             silent = T, 
                             ...)
-
+  
   # <file> can be data rather than a path, which has no file name to show
   if (!hasArg(title)) {
-
+    
     if (is.character(file) && length(file) == 1)
       title <- basename(file)
-
+    
     else if (hasArg(fallback) && is.character(fallback) && length(fallback) == 1)
       title <- basename(fallback)
-
+    
     else
       title <- "preview"
-
+    
   }
-
+  
   if (interactive()) {
-
+    
     # RStudio masks View() on the search path with its own data viewer. A
     # package namespace does not see that mask, and utils::View() is base R's
     # separate window, which formats every column to text. Looking the function
     # up from the global environment finds RStudio's viewer when there is one
     # and falls back to utils::View() everywhere else.
     view_fun <- get("View", envir = globalenv())
-
+    
     if (inherits(preview, "data.frame"))
       view_fun(preview, title)
-
+    
     else
       purrr::iwalk(preview, 
                    \(x, i) view_fun(x, paste(title, i, sep = ": ")))
-
+    
   }
-
+  
   if (!silent) .preview_message(preview, 
                                 n_rows = .preview_n(n)$rows, 
                                 total_sets = attr(preview, "total_sets"))
-
+  
   return(invisible(preview))
-
+  
 }
 
 

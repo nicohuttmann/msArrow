@@ -581,6 +581,22 @@ open_data <- function(file,
     
   }
   
+  # Check for preview tibbles 
+  .file1 <- paste0(".", deparse(substitute(file)))[1]
+  .file2 <- paste0(".", .the_lhs())[1]
+  
+  if (tibble::is_tibble(file) && 
+      exists(.file1) && 
+      is.character(get(.file1)) && 
+      file.exists(get(.file1)))
+    file <- get(.file1)
+  else if (tibble::is_tibble(file) && 
+           exists(.file2) && 
+           is.character(get(.file2)) && 
+           file.exists(get(.file2)))
+    file <- get(.file2)
+  
+  
   if (length(file) > 1) {
     
     return(file)
